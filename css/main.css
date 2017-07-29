@@ -1,0 +1,16 @@
+.container {
+    margin-top: 64px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.control-group {
+    padding: 16px;
+}
+
+.col-3 {
+    float: left;
+    width: 30%;
+    margin-left: 1.5%;
+    margin-right: 1.5%;
+}
