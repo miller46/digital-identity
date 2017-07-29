@@ -1,16 +1,6 @@
-var bitcore = require('bitcore-lib');
 var ECIES = require('bitcore-ecies');
 var crypto = require("crypto");
 var eccrypto = require("eccrypto");
-
-function encryptWithPublicKey(sender, reciever, message) {
-    var ecies = ECIES()
-        .privateKey(sender.privateKey)
-        .publicKey(reciever.publicKey);
-
-    var encrypted = ecies.encrypt(message);
-    return encrypted.toString('hex');
-}
 
 function encrypt(sender, message, callback) {
     var buffer = new Buffer.from(hexToBytes("34" + sender));
@@ -43,6 +33,5 @@ function bytesToHex(bytes) {
     return hex.join("");
 }
 
-exports.encryptWithPublicKey = encryptWithPublicKey;
 exports.decrypt = decrypt;
 exports.encrypt = encrypt;

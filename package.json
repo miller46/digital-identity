@@ -24,6 +24,7 @@
     "ethereumjs-tx": "^1.2.2",
     "ethereumjs-util": "^4.5.0",
     "ethereumjs-wallet": "^0.6.0",
+    "etherscan-api": "^3.0.8",
     "fs": "^0.0.2",
     "ipfs-api": "^14.1.0",
     "js-sha256": "^0.3.0",

@@ -22,7 +22,7 @@ function post(url, headers, data, callback) {
     };
     request.post(options, function(error, httpResponse, body) {
         if (error) {
-            callback(err, undefined);
+            callback(error, undefined);
         } else {
             callback(undefined, body);
         }

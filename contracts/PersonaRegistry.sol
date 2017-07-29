@@ -21,6 +21,10 @@ contract PersonaRegistry {
         return (persona.dataTypes, persona.ipfsPointers);
     }
 
+    function getMeTest() constant returns(address) {
+        return msg.sender;
+    }
+
     function getPersona(address personaAddress) constant returns (bytes32[], bytes32[]) {
         bytes32[] storage allowedDataPointers;
         bytes32[] storage allowedDataTypes;
