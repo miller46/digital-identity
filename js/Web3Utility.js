@@ -77,7 +77,7 @@ function call(web3, contract, address, functionName, args, callback) {
         });
     }
     try {
-        if (web3.currentProvider) {
+        if (false) {
             var data = contract[functionName].getData.apply(null, args);
             web3.eth.call({to: address, data: data}, function(err, result){
                 if (!err) {

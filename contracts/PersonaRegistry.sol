@@ -5,7 +5,7 @@ contract PersonaRegistry {
     struct Persona {
         address[] readers;
         bytes32[] dataTypes;
-        bytes32[] ipfsPointers;
+        mapping(address => bytes32[]) ipfsPointers;
         bool isCreated;
     }
 
@@ -16,64 +16,35 @@ contract PersonaRegistry {
 
     }
 
-    function getMyPersona() constant returns (bytes32[], bytes32[]) {
-        Persona memory persona = personas[msg.sender];
-        return (persona.dataTypes, persona.ipfsPointers);
+    function getPersona(address entity, address personaAddress) constant returns (bytes32[], bytes32[]) {
+        Persona persona = personas[personaAddress];
+        return (persona.dataTypes, persona.ipfsPointers[entity]);
     }
 
-    function getMeTest() constant returns(address) {
-        return msg.sender;
-    }
+    function addPersona(address entity, bytes32[] dataTypes, bytes32[] dataPointers) {
+        Persona storage persona = personas[msg.sender];
+        persona.dataTypes = dataTypes;
+        persona.ipfsPointers[entity] = dataPointers;
+        persona.isCreated = true;
 
-    function getPersona(address personaAddress) constant returns (bytes32[], bytes32[]) {
-        bytes32[] storage allowedDataPointers;
-        bytes32[] storage allowedDataTypes;
-
-        Persona memory persona = personas[personaAddress];
-        for (uint i = 0; i < persona.dataTypes.length; i++) {
-            bytes32 dataType = persona.dataTypes[i];
-            if (personaAddress == msg.sender || personaAllowances[personaAddress][msg.sender][dataType]) {
-                allowedDataTypes.push(dataType);
-                allowedDataPointers.push(dataType);
-            }
-        }
-
-        return (allowedDataTypes, allowedDataPointers);
-    }
-
-    function addPersona(bytes32[] dataTypes, bytes32[] dataPointers) returns (bool) {
-        if (!personas[msg.sender].isCreated) {
-            Persona memory persona;
-            persona.dataTypes = dataTypes;
-            persona.ipfsPointers = dataPointers;
-            persona.isCreated = true;
-            personas[msg.sender] = persona;
-            return true;
-        }
-
-        return false;
-    }
-
-    function updatePersona(bytes32[] dataTypes, bytes32[] dataPointers) {
-        if (personas[msg.sender].isCreated) {
-            Persona storage persona = personas[msg.sender];
-            persona.dataTypes = dataTypes;
-            persona.ipfsPointers = dataPointers;
+        for (uint i = 0; i < dataTypes.length; i++) {
+            personaAllowances[msg.sender][msg.sender][dataTypes[i]] = true;
         }
     }
 
-    function getDataPointerForType(address personaAddress, bytes32 dataTypeHash) constant returns (bytes32) {
-        Persona memory persona = personas[personaAddress];
-        for (uint i = 0; i < persona.dataTypes.length; i++) {
-            if (persona.dataTypes[i] == dataTypeHash) {
-                return persona.ipfsPointers[i];
-            }
+    function addAllowance(address personaAddress, bytes32[] dataTypes) {
+        for (uint i = 0; i < dataTypes.length; i++) {
+            personaAllowances[msg.sender][personaAddress][dataTypes[i]] = true;
         }
-
-        revert();
     }
 
-    function stringToBytes32(string memory source) returns (bytes32 result) {
+    function revokeAllowance(address personaAddress, bytes32[] dataTypes) {
+        for (uint i = 0; i < dataTypes.length; i++) {
+            personaAllowances[msg.sender][personaAddress][dataTypes[i]] = false;
+        }
+    }
+
+    function stringToBytes32(string memory source) internal returns (bytes32 result) {
         assembly {
             result := mload(add(source, 32))
         }

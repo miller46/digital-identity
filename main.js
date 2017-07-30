@@ -14,14 +14,6 @@ var userAccount;
 
 //**  ** //
 
-web3.version.getWhisper(function(whisperError, version) {
-    if (whisperError) {
-        console.log("Whisper error: " + whisperError);
-    } else {
-        console.log("Whisper version: " + version);
-    }
-});
-
 web3.version.getNetwork(function(networkError, version) {
     if (networkError) {
         console.log("Network error: " + networkError);
@@ -47,31 +39,29 @@ web3.version.getNetwork(function(networkError, version) {
         if (contractError) {
             console.log(contractError);
         } else {
-            console.log(contract);
             registryContract = contract;
 
-            Web3Utility.call(web3, contract, Config.personaRegistryAddress, 'getMeTest', [{from: userAccount.address, gas: Config.defaultGasPrice}], function(functionError, result) {
+            Web3Utility.callContractFunction(contract, Config.personaRegistryAddress, 'getPersona', [userAccount.address, userAccount.address], function(functionError, result) {
                 if (functionError) {
                     console.log(functionError);
                 } else {
-                    console.log(result);
                     if (result[0].length > 0) {
-
-                        // decode data and show in form
+                        var dataTypes = result[0];
+                        var ipfsPointers = result[1];
+                        for (var i = 0; i < dataTypes.length; i++) {
+                            var field = web3.toAscii(dataTypes[i]);
+                            var pointer = web3.toAscii(ipfsPointers[i]);
+                            ipfs.files.cat(Buffer.from(pointer), function(error, result) {
+                                if (error) {
+                                    console.log(error);
+                                } else {
+                                    $('input[name="' + field + '"]').val(result);
+                                }
+                            });
+                        }
                     }
                 }
             });
-
-            // Web3Utility.callContractFunction(contract, Config.personaRegistryAddress, 'getMyPersona', [{from: userAccount.address}], function(functionError, result) {
-            //     if (functionError) {
-            //         console.log(functionError);
-            //     } else {
-            //         if (result[0].length > 0) {
-            //
-            //             // decode data and show in form
-            //         }
-            //     }
-            // });
         }
     });
 });
@@ -108,7 +98,9 @@ function initClickListeners() {
                     if (!error) {
                         // TODO verify you use hash, not path on the mainnet
                         dataTypeNames.push(web3.fromAscii(field, 32));
-                        ipfsPointers.push(response[0].hash);
+                        ipfsPointers.push(web3.fromAscii(response[0].path, 32));
+                    } else {
+                        console.log("IFPS Error: " + error);
                     }
                     callback(undefined);
                 });
@@ -117,16 +109,20 @@ function initClickListeners() {
             if (typeof error !== 'undefined') {
                 console.log(errpr);
             } else {
-                Web3Utility.send(registryContract, Config.personaRegistryAddress, 'addPersona', [dataTypeNames, ipfsPointers, {
-                    gas: 250000,
-                    value: 0
-                }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
-                    if (functionError) {
-                        console.log(functionError);
-                    } else {
-                        console.log(result);
-                    }
-                });
+                if (ipfsPointers.length > 0) {
+                    Web3Utility.send(registryContract, Config.personaRegistryAddress, 'addPersona', [userAccount.address, dataTypeNames, ipfsPointers, {
+                        gas: 250000,
+                        value: 0
+                    }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
+                        if (functionError) {
+                            console.log(functionError);
+                        } else {
+                            console.log(result);
+                        }
+                    });
+                } else {
+                    console.log("ipfs pointers empty");
+                }
             }
         });
     });
@@ -141,7 +137,7 @@ function saveIpfsFile(name, data, callback) {
     reader.onloadend = function(event) {
         console.log(event.target.result);
 
-        var buffer = buffer = Buffer.from(reader.result);
+        var buffer = Buffer.from(reader.result);
         ipfs.files.add(buffer, function(error, response) {
             if (error) {
                 console.log(error);
