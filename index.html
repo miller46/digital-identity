@@ -14,75 +14,29 @@
     <link rel="stylesheet" type="text/css" href="/css/main.css">
 </head>
 <body>
+<div id="tabs-body" class="container">
+
+    <div class="tab-content panel-body">
+        <div class="tab-pane active" id="tab-portfolio">
+            <div id="scannerTab"></div>
+        </div>
+
+        <div class="tab-pane" id="tab-reports">
+            <div id="profileTab"></div>
+        </div>
+    </div>
+
+</div>
+
     <div class="container">
 
-        <div class="panel panel-primary">
-            <div class="panel-heading">
-                <h3 class="panel-title">Create Persona</h3>
-            </div>
+        <div id="scannerContainer"></div>
 
-            <div class="panel-body">
-                <div class="control-group">
-                    <label class="control-label">Address</label>
-                    <h4 id="user-address">0x...</h4>
-                    <a id="private-key-toggle" href="javascript:;">Show private key...</a><h4 id="user-private-key" style="display:none;"></h4>
-                </div>
+        <div style="display:none" id="profileContainer"></div>
 
-                <div class="col-3">
-                    <div class="panel panel-warning">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Category: Personal</h3>
-                        </div>
+    </div>
 
-                        <div class="panel-body">
-                            <div class="control-group">
-                                <label class="control-label">Name</label>
-                                <input type="text" class="form-control" name="name" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-3">
-                    <div class="panel panel-success">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Category: Contact</h3>
-                        </div>
-
-                        <div class="panel-body">
-                            <div class="control-group">
-                                <label class="control-label">Email Address</label>
-                                <input type="text" class="form-control" name="email" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-3">
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">
-                            <h3 class="panel-title">Category: Address</h3>
-                        </div>
-
-                        <div class="panel-body">
-                            <div class="control-group">
-                                <label class="control-label">City</label>
-                                <input type="text" class="form-control" name="city" />
-                            </div>
-
-                            <div class="control-group">
-                                <label class="control-label">Country</label>
-                                <input type="text" class="form-control" name="country" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <button id="create-button" class="btn btn-lg btn-primary">Create</button>
-                </div>
-            </div>
-        </div>
+    <div class="authorizeContainer">
 
     </div>
 
@@ -91,6 +45,9 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
+<script type="text/javascript" src="js/instascan.min.js"></script>
+<script src="js/qrcode.min.js"></script>
+<script src="js/ejs.js"></script>
 <script src="js/alertify.min.js" type="text/javascript"></script>
 <script src="js/bundle.js"></script>
 

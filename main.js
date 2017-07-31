@@ -18,11 +18,60 @@ var userAccount;
 main();
 
 function main() {
+    initUi();
+
     initClickListeners();
 
     initUserInfo();
 
     loadData();
+}
+
+function initUi() {
+    initScanner();
+    loadTemplate(Config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
+    loadTemplate(Config.baseUrl + '/html/' + 'profile.ejs', 'profileContainer', {});
+    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', {});
+}
+
+function initScanner() {
+    loadTemplate(Config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
+
+    var opts = {
+        continuous: true,
+        video: document.getElementById('preview'),
+        mirror: true,
+        captureImage: false,
+        backgroundScan: false,
+        refractoryPeriod: 5000,
+        scanPeriod: 1
+    };
+
+    var scanner = new Instascan.Scanner(opts);
+    scanner.addListener('scan', function (content) {
+        console.log(content);
+        try {
+            var data = JSON.parse(content);
+            showAuthorizationDialog(data);
+        } catch(e) {
+            console.log(e);
+        }
+    });
+    Instascan.Camera.getCameras().then(function (cameras) {
+        if (cameras.length > 0) {
+            console.error(cameras.length + ' cameras found.');
+            scanner.start(cameras[0]);
+        } else {
+            console.error('No cameras found.');
+        }
+    }).catch(function (e) {
+        console.error(e);
+    });
+}
+
+function showAuthorizationDialog(authorizationData) {
+    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', authorizationData);
+    $('#tfa_send_modal').modal('show');
 }
 
 function initUserInfo() {
@@ -55,6 +104,14 @@ function showErrorState(error) {
 
 }
 
+function loadTemplate(url, element, data) {
+    if ($('#' + element).length) {
+        new EJS({url: url}).update(element, data);
+    } else {
+        console.log(element + ' template found')
+    }
+}
+
 function userExists() {
     return CookieUtility.readCookie("account");
 }
@@ -66,6 +123,7 @@ function initUserAccount() {
 function initNewAccount() {
     userAccount = Web3Utility.createAccount();
     CookieUtility.saveCookie("account", JSON.stringify(userAccount));
+    $('#create-button').text("Create");
     showNewAccountPrompt(userAccount);
 }
 
