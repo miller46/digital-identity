@@ -25,7 +25,7 @@ This app requires node and uses IPFS to store files.  You must first install IPF
 
 To run:  
 
-npm install
-ipfs daemon
-browserify main.js > js/bundle.js
-node app
+    npm install
+    ipfs daemon
+    browserify main.js > js/bundle.js
+    node app
