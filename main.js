@@ -5,66 +5,141 @@ var async = require('async');
 var CookieUtility = require("./js/CookieUtility.js");
 var Crypto = require("./js/Crypto.js");
 
+
 //** Globals ** //
 
-var web3 = Web3Utility.initWeb3();
+var web3 = Web3Utility.initWeb3(window.web3);
 var ipfs = Web3Utility.initIpfs();
 var registryContract;
 var userAccount;
 
 //**  ** //
 
-web3.version.getNetwork(function(networkError, version) {
-    if (networkError) {
-        console.log("Network error: " + networkError);
-    } else {
-        console.log("Network version: " + version);
-    }
+main();
 
+function main() {
     initClickListeners();
 
-    userAccount = CookieUtility.readCookie("account");
-    if (userAccount) {
-        userAccount = JSON.parse(userAccount);
+    initUserInfo();
+
+    loadData();
+}
+
+function initUserInfo() {
+    if (userExists()) {
+        userAccount = initUserAccount();
     } else {
-        userAccount = Web3Utility.createAccount();
-        CookieUtility.saveCookie("account", JSON.stringify(userAccount));
+        initNewAccount();
         showNewAccountPrompt(userAccount);
     }
+    showUserAccountInfo(userAccount);
+}
 
-    $('#user-address').text(userAccount.address);
-    $('#user-private-key').text(userAccount.privateKey);
+function loadData() {
+    showUserAccountInfo(userAccount);
 
-    Web3Utility.loadContract(Config.personaRegistryContract, Config.personaRegistryAddress, function(contractError, contract) {
-        if (contractError) {
-            console.log(contractError);
+    async.waterfall([
+        loadContract,
+        fetchPersona,
+        fetchIpfsFile
+    ], function (error, result) {
+        if (error) {
+            showErrorState(error);
         } else {
-            registryContract = contract;
-
-            Web3Utility.callContractFunction(contract, Config.personaRegistryAddress, 'getPersona', [userAccount.address, userAccount.address], function(functionError, result) {
-                if (functionError) {
-                    console.log(functionError);
-                } else {
-                    if (result[0].length > 0) {
-                        var dataTypes = result[0];
-                        var ipfsPointers = result[1];
-                        for (var i = 0; i < dataTypes.length; i++) {
-                            var field = web3.toAscii(dataTypes[i]);
-                            var pointer = web3.toAscii(ipfsPointers[i]);
-                            ipfs.files.cat(Buffer.from(pointer), function(error, result) {
-                                if (error) {
-                                    console.log(error);
-                                } else {
-                                    $('input[name="' + field + '"]').val(result);
-                                }
-                            });
-                        }
-                    }
-                }
-            });
+            populateFormWithPersonaData(result);
         }
     });
-});
+}
+
+function showErrorState(error) {
+
+}
+
+function userExists() {
+    return CookieUtility.readCookie("account");
+}
+
+function initUserAccount() {
+    return JSON.parse(CookieUtility.readCookie("account"));
+}
+
+function initNewAccount() {
+    userAccount = Web3Utility.createAccount();
+    CookieUtility.saveCookie("account", JSON.stringify(userAccount));
+    showNewAccountPrompt(userAccount);
+}
+
+function showUserAccountInfo(account) {
+    $('#user-address').text(account.address);
+    $('#user-private-key').text(account.privateKey);
+}
+
+function loadContract(callback) {
+    Web3Utility.loadContract(web3, Config.personaRegistryContract, Config.personaRegistryAddress,
+        function(error, contract) {
+        if (error) {
+            console.log(error);
+            callback(error, undefined);
+        } else {
+            registryContract = contract;
+            callback(null, contract);
+        }
+    });
+}
+
+function fetchPersona(contract, callback) {
+    Web3Utility.callContractFunction(web3, contract, Config.personaRegistryAddress, 'getIpfsPointer',
+        [userAccount.address, userAccount.address], function(error, result) {
+        if (error) {
+            console.log(error);
+            callback(error, undefined);
+        } else {
+            callback(undefined, result);
+        }
+    });
+}
+
+function fetchIpfsFile(ipfsPointer, callback) {
+    if (!ipfsPointer) {
+        callback(undefined, "{}");
+    } else {
+        ipfs.files.cat("/ipfs/" + ipfsPointer, function (error, stream) {
+            if (error) {
+                console.log(error);
+                callback(error, undefined);
+            } else {
+                var fileParts = [];
+                stream.on("data", function (part) {
+                    fileParts.push(part.toString());
+                });
+
+                stream.on("end", function () {
+                    var fileContents = "";
+                    for (var i = 0; i < fileParts.length; i++) {
+                        fileContents += fileParts[i];
+                    }
+                    var data = Crypto.decrypt(userAccount.privateKey, fileContents);
+                    console.log(data);
+                    callback(undefined, data);
+                });
+            }
+        });
+    }
+}
+
+function populateFormWithPersonaData(fileContents) {
+    console.log(fileContents);
+    try {
+        var data = JSON.parse(fileContents);
+        for (var field in data) {
+            if (data.hasOwnProperty(field)) {
+                $('input[name="' + field + '"]').val(data[field]);
+            }
+        }
+    } catch(error) {
+        console.log(error);
+    }
+}
 
 function showNewAccountPrompt(account) {
     var message = "Here is your new Ethereum account: " + account.address +
@@ -76,60 +151,50 @@ function showNewAccountPrompt(account) {
 
 function initClickListeners() {
     $('#create-button').click(function() {
-        var fields = ["name", "email", "city", "country"];
-
-        var nonEmptyFields = [];
-
-        for (var i = 0; i < fields.length; i++) {
-            var field = fields[i];
-            var value = $('input[name="' + field + '"]').val();
-            if (value) {
-                nonEmptyFields.push({field: field, value: value});
-            }
-        }
-
-        var ipfsPointers = [];
-        var dataTypeNames = [];
-        async.each(nonEmptyFields, function(item, callback) {
-            var field = item.field;
-            // var value = Crypto.encryptWithPublicKey(userAccount, userAccount, item.value);
-            Crypto.encrypt(userAccount.publicKey, web3.fromAscii(item.value, 32), function(value) {
-                saveIpfsFile(userAccount.address + "-" + field + ".txt", value, function(error, response) {
-                    if (!error) {
-                        // TODO verify you use hash, not path on the mainnet
-                        dataTypeNames.push(web3.fromAscii(field, 32));
-                        ipfsPointers.push(web3.fromAscii(response[0].path, 32));
-                    } else {
-                        console.log("IFPS Error: " + error);
-                    }
-                    callback(undefined);
-                });
-            });
-        }, function(errpr) {
-            if (typeof error !== 'undefined') {
-                console.log(errpr);
-            } else {
-                if (ipfsPointers.length > 0) {
-                    Web3Utility.send(registryContract, Config.personaRegistryAddress, 'addPersona', [userAccount.address, dataTypeNames, ipfsPointers, {
-                        gas: 250000,
-                        value: 0
-                    }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
-                        if (functionError) {
-                            console.log(functionError);
-                        } else {
-                            console.log(result);
-                        }
-                    });
-                } else {
-                    console.log("ipfs pointers empty");
-                }
-            }
-        });
+        createPersona();
     });
 
     $('#private-key-toggle').click(function() {
         $('#user-private-key').show();
     });
+}
+
+function createPersona() {
+    var fileContents = buildFileContents();
+
+    var publicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
+    var encryptedData = Crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
+    saveIpfsFile(userAccount.address + "-" + userAccount.address + ".txt",
+        encryptedData, function(error, response) {
+        if (error) {
+            console.log(error);
+        } else {
+            var publicKey = Crypto.createPublicKey(userAccount.privateKey);
+            var ipfsPointer = response[0].path;
+            Web3Utility.send(web3, registryContract, Config.personaRegistryAddress, 'createPersona', [publicKey, ipfsPointer, {
+                gas: 250000,
+                value: 0
+            }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
+                if (functionError) {
+                    console.log(functionError);
+                } else {
+                    console.log(result);
+                }
+            });
+        }
+    });
+}
+
+function buildFileContents() {
+    var fields = ["name", "email", "city", "country"];
+
+    var data = {};
+    for (var i = 0; i < fields.length; i++) {
+        var field = fields[i];
+        data[field] = $('input[name="' + field + '"]').val();
+    }
+
+    return JSON.stringify(data);
 }
 
 function saveIpfsFile(name, data, callback) {
@@ -150,7 +215,7 @@ function saveIpfsFile(name, data, callback) {
     };
 
     var file = new File([data], name, {
-        type: "text/plain",
+        type: "text/plain"
     });
     reader.readAsText(file);
 }

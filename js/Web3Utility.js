@@ -13,8 +13,7 @@ var Config = require('./Config.js');
 var FileUtility = require('./FileUtility.js');
 var NetworkUtility = require('./NetworkUtility.js');
 
-function initWeb3() {
-    var web3 = window.web3;
+function initWeb3(web3) {
     if (typeof web3 !== 'undefined' && typeof Web3 !== 'undefined') {
         //is MetaMask
         web3 = new Web3(web3.currentProvider);
@@ -32,13 +31,13 @@ function initIpfs() {
     return IpfsAPI({host: 'localhost', port: '5001', protocol: 'http'});
 }
 
-function loadContract(name, address, callback) {
+function loadContract(web3, name, address, callback) {
     FileUtility.readLocalFile(name + '.json', function(readError, abi) {
         if (readError) {
             callback(readError, undefined);
         } else {
             try {
-                var contract = window.web3.eth.contract(JSON.parse(abi)).at(address);
+                var contract = web3.eth.contract(JSON.parse(abi)).at(address);
                 callback(undefined, contract);
             } catch (contractError) {
                 callback(contractError, undefined);
@@ -77,7 +76,7 @@ function call(web3, contract, address, functionName, args, callback) {
         });
     }
     try {
-        if (false) {
+        if (web3.currentProvider) {
             var data = contract[functionName].getData.apply(null, args);
             web3.eth.call({to: address, data: data}, function(err, result){
                 if (!err) {
@@ -101,7 +100,7 @@ function call(web3, contract, address, functionName, args, callback) {
     }
 }
 
-function callContractFunction(contract, address, functionName, args, callback) {
+function callContractFunction(web3, contract, address, functionName, args, callback) {
     function proxy(retries) {
         const web3 = new Web3();
         const data = contract[functionName].getData.apply(null, args);
@@ -135,7 +134,6 @@ function callContractFunction(contract, address, functionName, args, callback) {
             }
         });
     }
-    var web3 = window.web3;
     try {
         if (web3.currentProvider) {
             var data = contract[functionName].getData.apply(null, args);
@@ -146,7 +144,8 @@ function callContractFunction(contract, address, functionName, args, callback) {
                     });
                     var solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
                     try {
-                        callback(undefined, solidityFunction.unpackOutput(result));
+                        var output = solidityFunction.unpackOutput(result);
+                        callback(undefined, output);
                     } catch (resultError) {
                         callback(resultError, undefined);
                     }
@@ -185,8 +184,7 @@ function callWithApiProxy() {
     });
 }
 
-function send(contract, address, functionName, args, fromAddress, privateKey, nonce, callback) {
-    var web3 = window.web3;
+function send(web3, contract, address, functionName, args, fromAddress, privateKey, nonce, callback) {
     if (privateKey && privateKey.substring(0,2) === '0x') {
         privateKey = privateKey.substring(2,privateKey.length);
     }
@@ -211,7 +209,7 @@ function send(contract, address, functionName, args, fromAddress, privateKey, no
     if (utils.isObject(args[args.length - 1])) {
         options = args.pop();
     }
-    getNextNonce(fromAddress, function(err, nextNonce) {
+    getNextNonce(web3, fromAddress, function(err, nextNonce) {
         if (nonce == undefined || nonce < nextNonce) {
             nonce = nextNonce;
         }
@@ -240,7 +238,7 @@ function send(contract, address, functionName, args, fromAddress, privateKey, no
             tx = new Tx(options);
             function proxy() {
                 if (privateKey) {
-                    signTx(fromAddress, tx, privateKey, function (errSignTx, txSigned) {
+                    signTx(web3, fromAddress, tx, privateKey, function (errSignTx, txSigned) {
                         if (!errSignTx) {
                             var serializedTx = txSigned.serialize().toString('hex');
                             var url;
@@ -301,14 +299,13 @@ function send(contract, address, functionName, args, fromAddress, privateKey, no
     });
 }
 
-function signTx(address, tx, privateKey, callback) {
-    var web3 = window.web3;
+function signTx(web3, address, tx, privateKey, callback) {
     if (privateKey) {
         tx.sign(new Buffer(privateKey, 'hex'));
         callback(undefined, tx);
     } else {
         var msgHash = '0x' + tx.hash(false).toString('hex');
-        web3.eth.sign(address, msgHash, function(err, sig) {
+        web3.eth.sign(web3, address, msgHash, function(err, sig) {
             if (!err) {
                 try {
                     function hexToUint8array(s) {
@@ -338,8 +335,7 @@ function signTx(address, tx, privateKey, callback) {
     }
 }
 
-function sign(address, value, privateKey, callback) {
-    var web3 = window.web3;
+function sign(web3, address, value, privateKey, callback) {
     if (privateKey) {
         if (privateKey.substring(0,2) == '0x') {
             privateKey = privateKey.substring(2,privateKey.length);
@@ -360,7 +356,7 @@ function sign(address, value, privateKey, callback) {
     } else {
         web3.eth.sign(address, value, function(err, sig) {
             if (err && value.slice(0,2) != '0x') {
-                sign(address, '0x'+value, privateKey, callback);
+                sign(web3, address, '0x'+value, privateKey, callback);
             } else if (!err) {
                 try {
                     var r = sig.slice(0, 66);
@@ -378,7 +374,7 @@ function sign(address, value, privateKey, callback) {
     }
 }
 
-function getNextNonce(address, callback) {
+function getNextNonce(web3, address, callback) {
     function proxy() {
         var url = 'https://' + (Config.isTestNet ? Config.networkName : 'api') + '.etherscan.io/api?module=proxy&action=eth' +
             'GetTransactionCount&address=' + address + '&tag=latest';
@@ -393,7 +389,6 @@ function getNextNonce(address, callback) {
             }
         });
     }
-    var web3 = window.web3;
     try {
         if (web3.currentProvider) {
             web3.eth.getTransactionCount(address, function(err, result) {
