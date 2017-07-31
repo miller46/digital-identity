@@ -1,0 +1,33 @@
+{
+  "name": "persona-registry",
+  "version": "1.0.0",
+  "main": "main.js",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "alertify": "^0.3.0",
+    "assert": "^1.4.1",
+    "async": "^2.0.0-rc.5",
+    "bignumber.js": "^2.4.0",
+    "body-parser": "^1.17.1",
+    "bitcore-lib": "^0.14.0",
+    "bitcore-ecies": "^1.0.3",
+    "ethereumjs-tx": "^1.2.2",
+    "ethereumjs-util": "^4.5.0",
+    "ethereumjs-wallet": "^0.6.0",
+    "etherscan-api": "^3.0.8",
+    "express": "^4.14.1",
+    "express-ejs-layouts": "^2.2.0",
+    "fs": "^0.0.2",
+    "ipfs-api": "^14.1.0",
+    "js-sha256": "^0.3.0",
+    "keythereum": "^0.2.6",
+    "request": "^2.79.0",
+    "safe-buffer": "^5.1.1",
+    "solc": "^0.4.2",
+    "web3": "^0.17.0-beta"
+  }
+}
