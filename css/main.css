@@ -1,11 +1,48 @@
+body {
+    height: 100vh;
+}
+
 .container {
     margin-top: 64px;
     margin-left: auto;
     margin-right: auto;
 }
 
+#main-container {
+    height: 100%;
+    width: 100%;
+}
+
 .control-group {
     padding: 16px;
+}
+
+.full {
+    height: 100%;
+    width: 100%;
+}
+
+#main-tabs {
+    height: 88px;
+    background-color: #5bc0de;
+}
+
+#main-tabs div a {
+    font-size: 24px;
+    color: #ffffff;
+}
+
+#main-tabs div i {
+    color: #ffffff;
+    margin-top: 4px;
+    margin-right: 4px;
+}
+
+#main-tabs div {
+    width: 50%;
+    float: left;
+    text-align: center;
+    margin-top: 24px;
 }
 
 .address {
@@ -39,6 +76,10 @@
     }
 }
 
+#tabs h3 {
+    padding: 5px 15px;
+}
+
 video#preview {
     background-color: #000000;
     width: 100%;
@@ -53,13 +94,24 @@ img#qr_cursor {
     margin-left: -145px;
 }
 
-
-
-
-
-
 /* alertify overide */
 
 .alertify .ajs-dialog {
     max-width: 600px; !important;
+}
+
+
+/** Clearfix **/
+
+.clearfix:before, .clearfix:after {
+    content: "";
+    display: table;
+}
+
+.clearfix:after {
+    clear: both;
+}
+
+.clearfix {
+    *zoom: 1;
 }

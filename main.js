@@ -12,6 +12,7 @@ var web3 = Web3Utility.initWeb3(window.web3);
 var ipfs = Web3Utility.initIpfs();
 var registryContract;
 var userAccount;
+var scanner;
 
 //**  ** //
 
@@ -37,6 +38,10 @@ function initUi() {
 function initScanner() {
     loadTemplate(Config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
 
+    beginScanner();
+}
+
+function beginScanner() {
     var opts = {
         continuous: true,
         video: document.getElementById('preview'),
@@ -47,7 +52,7 @@ function initScanner() {
         scanPeriod: 1
     };
 
-    var scanner = new Instascan.Scanner(opts);
+    scanner = new Instascan.Scanner(opts);
     scanner.addListener('scan', function (content) {
         console.log(content);
         try {
@@ -57,9 +62,10 @@ function initScanner() {
             console.log(e);
         }
     });
+
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
-            console.error(cameras.length + ' cameras found.');
+            console.log(cameras.length + ' cameras found.');
             scanner.start(cameras[0]);
         } else {
             console.error('No cameras found.');
@@ -110,6 +116,18 @@ function loadTemplate(url, element, data) {
     } else {
         console.log(element + ' template found')
     }
+}
+
+function showScannerTab() {
+    beginScanner();
+    $('#scannerContainer').show();
+    $('#profileContainer').hide();
+}
+
+function showProfileTab() {
+    scanner.stop();
+    $('#scannerContainer').hide();
+    $('#profileContainer').show();
 }
 
 function userExists() {
@@ -214,6 +232,14 @@ function initClickListeners() {
 
     $('#private-key-toggle').click(function() {
         $('#user-private-key').show();
+    });
+
+    $('#tab-scanner').click(function() {
+        showScannerTab();
+    });
+
+    $('#tab-profile').click(function() {
+        showProfileTab();
     });
 }
 

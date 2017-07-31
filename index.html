@@ -14,30 +14,28 @@
     <link rel="stylesheet" type="text/css" href="/css/main.css">
 </head>
 <body>
-<div id="tabs-body" class="container">
+    <div id="main-container" class="full">
+        <div id="main-tabs">
+            <div class="tab-pane active" id="tab-scanner">
+                <i class="fa fa-2x fa-qrcode"></i><a id="scannerTabButton" href="#securityTab" data-toggle="tab">Scanner</a>
+            </div>
 
-    <div class="tab-content panel-body">
-        <div class="tab-pane active" id="tab-portfolio">
-            <div id="scannerTab"></div>
+            <div class="tab-pane" id="tab-profile">
+                <i class="fa fa-2x fa-user"></i><a id="profileTabButton" href="#profileTab" data-toggle="tab">Profile</a>
+            </div>
         </div>
 
-        <div class="tab-pane" id="tab-reports">
-            <div id="profileTab"></div>
+        <div class="full">
+
+            <div id="scannerContainer" class="full"></div>
+
+            <div style="display:none" id="profileContainer"></div>
+
         </div>
-    </div>
 
-</div>
+        <div class="authorizeContainer">
 
-    <div class="container">
-
-        <div id="scannerContainer"></div>
-
-        <div style="display:none" id="profileContainer"></div>
-
-    </div>
-
-    <div class="authorizeContainer">
-
+        </div>
     </div>
 
 </body>
