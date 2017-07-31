@@ -8,6 +8,21 @@ body {
     margin-right: auto;
 }
 
+.form-row {
+    padding: 32px;
+    text-transform: capitalize;
+}
+
+.form-row i {
+    float: left;
+    padding: 4px;
+    margin-right: 16px;
+}
+
+.form-row p {
+    margin-top: 8px;
+}
+
 #main-container {
     height: 100%;
     width: 100%;

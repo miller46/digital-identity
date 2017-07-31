@@ -1,17 +1,21 @@
-<div class="modal fade" id="tfa_send_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-    <div class="modal-dialog modal-sm" role="document">
+<div class="modal fade" id="authorize_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title trn">Authorize <%= name %></h4>
+                <h4 class="modal-title trn">Authorize Data Sharing</h4>
             </div>
             <div class="modal-body">
-                <h5 class="modal-title trn">You are about to share the following data: </h5>
-                <% for (var i = 0; i < permissions.length; i++) { %>
-                    <div class="form-group">
-                        <label>x</label>
-                        <p><%=permissions[i]%></p>
-                    </div>
+                <h5 class="modal-title trn">You are about to share the following data with <b><%= data.name %></b></h5>
+                <% for (var i = 0; i < data.permissions.length; i++) { %>
+                <div class="form-row">
+                    <% if (data.permissions[i] == "name") { %>
+                    <i class="fa fa-2x fa-user"></i>
+                    <% } else if (data.permissions[i] == "city") { %>
+                    <i class="fa fa-2x fa-building"></i>
+                    <% } %>
+                    <p><%=data.permissions[i] %></p>
+                </div>
                 <% } %>
             </div>
             <div class="modal-footer">
@@ -20,5 +24,4 @@
             </div>
         </div>
     </div>
-</div>
 </div>

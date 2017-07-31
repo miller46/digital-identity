@@ -28,11 +28,21 @@ function main() {
     loadData();
 }
 
+function mockAuthorize() {
+    var data = {
+        publicKey: "",
+        name: "Test Application",
+        permissions: [
+            "name", "city"
+        ]
+
+    };
+    showAuthorizationDialog(data);
+}
+
 function initUi() {
     initScanner();
-    loadTemplate(Config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
     loadTemplate(Config.baseUrl + '/html/' + 'profile.ejs', 'profileContainer', {});
-    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', {});
 }
 
 function initScanner() {
@@ -76,8 +86,8 @@ function beginScanner() {
 }
 
 function showAuthorizationDialog(authorizationData) {
-    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', authorizationData);
-    $('#tfa_send_modal').modal('show');
+    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', {data: authorizationData});
+    $('#authorize_modal').modal('show');
 }
 
 function initUserInfo() {
