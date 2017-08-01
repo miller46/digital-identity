@@ -7,7 +7,7 @@ This contract is available on the Kovan testnet.
 
 <img alt="Scanner" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/Screen%20Shot%202017-07-31%20at%206.22.36%20PM.png" width=500 />
 <img alt="Approval" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/Screen%20Shot%202017-07-31%20at%206.21.29%20PM.png" width=500 />
-<img alt="Profile" scr="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/Screen%20Shot%202017-07-31%20at%206.23.12%20PM.png" width=500 />
+<img alt="Profile" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/Screen%20Shot%202017-07-31%20at%206.23.12%20PM.png" width=500 />
 
 Features
 * Securely store identity data
