@@ -1,5 +1,5 @@
 # digital-identity
-Self-sovereign identity system based on Ethereum
+Sovereign identity system based on Ethereum
 
 This contract is available on the Kovan testnet.  
 
@@ -22,11 +22,13 @@ The works by creating personas which are a mapping of data to an Ethereum addres
 <img alt="Profile" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/Screen%20Shot%202017-07-31%20at%206.23.12%20PM.png" width=500 />
 
 **NOTES**
+
 * The public key used to encryption is derived from the private key and is NOT the public key of the Ethereum address.
 * This only deploys data to local IPFS nodes at the moment.
 * This is still a little raw, and I plan to move it to a library
 
 **Prerequisites**
+
 This app requires node and uses IPFS to store files.  You must first install IPFS https://ipfs.io/docs/install/
 
 **To run** 
