@@ -154,14 +154,14 @@ function callContractFunction(web3, contract, address, functionName, args, callb
                 }
             });
         } else {
-            callWithApiProxy();
+            callWithApiProxy(contract);
         }
     } catch(contractError) {
         callback(contractError, undefined);
     }
 }
 
-function callWithApiProxy() {
+function callWithApiProxy(contract) {
     var web3 = new Web3();
     var data = contract[functionName].getData.apply(null, args);
     var result = undefined;
