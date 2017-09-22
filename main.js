@@ -84,10 +84,11 @@ function beginScanner() {
     //     console.error(e);
     // });
 
-    var errBack = function() {
-        console.log("Error");
+    var errBack = function(e) {
+        console.log("Error", e);
     };
 
+    var mediaConfig =  { video: true };
     var video = document.getElementById('preview');
 
     if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
