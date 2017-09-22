@@ -52,37 +52,47 @@ function initScanner() {
 }
 
 function beginScanner() {
-    var opts = {
-        continuous: true,
-        video: document.getElementById('preview'),
-        mirror: true,
-        captureImage: false,
-        backgroundScan: false,
-        refractoryPeriod: 5000,
-        scanPeriod: 1
-    };
+    // var opts = {
+    //     continuous: true,
+    //     video: document.getElementById('preview'),
+    //     mirror: true,
+    //     captureImage: false,
+    //     backgroundScan: false,
+    //     refractoryPeriod: 5000,
+    //     scanPeriod: 1
+    // };
+    //
+    // scanner = new Instascan.Scanner(opts);
+    // scanner.addListener('scan', function (content) {
+    //     console.log(content);
+    //     try {
+    //         var data = JSON.parse(content);
+    //         showAuthorizationDialog(data);
+    //     } catch(e) {
+    //         console.log(e);
+    //     }
+    // });
+    //
+    // Instascan.Camera.getCameras().then(function (cameras) {
+    //     if (cameras.length > 0) {
+    //         console.log(cameras.length + ' cameras found.');
+    //         scanner.start(cameras[0]);
+    //     } else {
+    //         console.error('No cameras found.');
+    //     }
+    // }).catch(function (e) {
+    //     console.error(e);
+    // });
 
-    scanner = new Instascan.Scanner(opts);
-    scanner.addListener('scan', function (content) {
-        console.log(content);
-        try {
-            var data = JSON.parse(content);
-            showAuthorizationDialog(data);
-        } catch(e) {
-            console.log(e);
-        }
-    });
+    var video = document.getElementById('preview');
 
-    Instascan.Camera.getCameras().then(function (cameras) {
-        if (cameras.length > 0) {
-            console.log(cameras.length + ' cameras found.');
-            scanner.start(cameras[0]);
-        } else {
-            console.error('No cameras found.');
-        }
-    }).catch(function (e) {
-        console.error(e);
-    });
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        // Not adding `{ audio: true }` since we only want video now
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+            video.src = window.URL.createObjectURL(stream);
+            video.play();
+        });
+    }
 }
 
 function showAuthorizationDialog(authorizationData) {
