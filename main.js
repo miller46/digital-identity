@@ -84,34 +84,34 @@ function beginScanner() {
     //     console.error(e);
     // });
 
-    var errBack = function(e) {
-        console.log("Error", e);
-    };
-
-    var mediaConfig =  { video: true };
-    var video = document.getElementById('preview');
-
-    if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
-            video.src = window.URL.createObjectURL(stream);
-            video.play();
-        });
-    } else if (navigator.getUserMedia) { // Standard
-        navigator.getUserMedia(mediaConfig, function(stream) {
-            video.src = stream;
-            video.play();
-        }, errBack);
-    } else if (navigator.webkitGetUserMedia) { // WebKit-prefixed
-        navigator.webkitGetUserMedia(mediaConfig, function(stream){
-            video.src = window.webkitURL.createObjectURL(stream);
-            video.play();
-        }, errBack);
-    } else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
-        navigator.mozGetUserMedia(mediaConfig, function(stream){
-            video.src = window.URL.createObjectURL(stream);
-            video.play();
-        }, errBack);
-    }
+    // var errBack = function(e) {
+    //     console.log("Error", e);
+    // };
+    //
+    // var mediaConfig =  { video: true };
+    // var video = document.getElementById('preview');
+    //
+    // if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    //     navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
+    //         video.src = window.URL.createObjectURL(stream);
+    //         video.play();
+    //     });
+    // } else if (navigator.getUserMedia) { // Standard
+    //     navigator.getUserMedia(mediaConfig, function(stream) {
+    //         video.src = stream;
+    //         video.play();
+    //     }, errBack);
+    // } else if (navigator.webkitGetUserMedia) { // WebKit-prefixed
+    //     navigator.webkitGetUserMedia(mediaConfig, function(stream){
+    //         video.src = window.webkitURL.createObjectURL(stream);
+    //         video.play();
+    //     }, errBack);
+    // } else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
+    //     navigator.mozGetUserMedia(mediaConfig, function(stream){
+    //         video.src = window.URL.createObjectURL(stream);
+    //         video.play();
+    //     }, errBack);
+    // }
 }
 
 function showAuthorizationDialog(authorizationData) {
