@@ -154,36 +154,11 @@ function callContractFunction(web3, contract, address, functionName, args, callb
                 }
             });
         } else {
-            callWithApiProxy(contract, functionName, args, callback);
+            proxy(1);
         }
     } catch(contractError) {
         callback(contractError, undefined);
     }
-}
-
-function callWithApiProxy(contract, functionName, args, callback) {
-    var web3 = new Web3();
-    var data = contract[functionName].getData.apply(null, args);
-    var result = undefined;
-    var url = 'https://' + (Config.isTestNet ? Config.networkName : 'api') + '.etherscan.io/api?module=proxy&action=eth_Call&to=' + address + '&data=' + data;
-    if (Config.etherscanApiKey) url += '&apikey='+ Config.etherscanApiKey;
-    NetworkUtility.get(url, {}, function(err, body) {
-        if (!err) {
-            try {
-                result = JSON.parse(body);
-                var functionAbi = contract.abi.find(function(element, index, array) {
-                    return element.name === functionName
-                });
-                var solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
-                var result = solidityFunction.unpackOutput(result['result']);
-                callback(undefined, result);
-            } catch (err) {
-                callback(err, undefined);
-            }
-        } else {
-            callback(err, undefined);
-        }
-    });
 }
 
 function send(web3, contract, address, functionName, args, fromAddress, privateKey, nonce, callback) {
