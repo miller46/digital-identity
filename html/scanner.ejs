@@ -3,42 +3,19 @@
     <!--<img src="/assets/qr_cursor.png" id="qr_cursor" />-->
 <!--</div>-->
 
-<div class="full">
-    <video id="video" autoplay></video>
-</div>
-
-<script>
-
-    window.addEventListener("DOMContentLoaded", function() {
-        var video = document.getElementById('video');
-        var mediaConfig =  { video: true };
-
-        var errBack = function(e) {
-            console.log('An error has occurred!', e)
-        };
-
-        if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
-                video.src = window.URL.createObjectURL(stream);
-                video.play();
-            });
-        } else if(navigator.getUserMedia) { // Standard
-            navigator.getUserMedia(mediaConfig, function(stream) {
-                video.src = stream;
-                video.play();
-            }, errBack);
-        } else if(navigator.webkitGetUserMedia) { // WebKit-prefixed
-            navigator.webkitGetUserMedia(mediaConfig, function(stream){
-                video.src = window.webkitURL.createObjectURL(stream);
-                video.play();
-            }, errBack);
-        } else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
-            navigator.mozGetUserMedia(mediaConfig, function(stream){
-                video.src = window.URL.createObjectURL(stream);
-                video.play();
-            }, errBack);
+<video id="preview"></video>
+<script type="text/javascript">
+    var scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+    scanner.addListener('scan', function (content) {
+        console.log(content);
+    });
+    Instascan.Camera.getCameras().then(function (cameras) {
+        if (cameras.length > 0) {
+            scanner.start(cameras[0]);
+        } else {
+            console.error('No cameras found.');
         }
-
-    }, false);
-
+    }).catch(function (e) {
+        console.error(e);
+    });
 </script>
