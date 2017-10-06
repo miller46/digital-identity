@@ -1,69 +1,51 @@
 <div class="container">
-    <div class="panel panel-primary">
-        <div class="panel-heading">
-            <h3 id="panel-title" class="panel-title">Create Persona</h3>
+
+    <div id="profile-container">
+
+        <div class="control-group clearfix">
+            <div class="left" id="icon"></div>
+            <div class="left" id="display-name-container">
+                <input type="text" placeholder="Display Name" class="form-control" id="display-name" name="name" />
+            </div>
+            <div class="clear"></div>
         </div>
 
-        <div class="panel-body">
-            <div class="control-group">
+        <div class="control-group">
+            <label class="control-label">Email Address</label>
+            <input type="text" class="form-control" name="email" />
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">City</label>
+            <input type="text" class="form-control" name="city" />
+        </div>
+
+        <div class="control-group">
+            <label class="control-label">Country</label>
+            <input type="text" class="form-control" name="country" />
+        </div>
+
+        <div class="control-group">
+            <button id="create-button" class="btn btn-lg btn-success">Save</button>
+        </div>
+
+    </div>
+
+    <div id="accounts-container">
+
+        <div class="control-group" id="ethereum-account-container">
+            <div id="ethereum-account-label-container" class="clearfix">
+                <img class="left" src="/assets/ethereum_logo.png" id="ethereum-account" />
+                <h3 id="ethereum-account-label" class="left">Ethereum Account</h3>
+                <div class="clear"></div>
+            </div>
+            <div>
                 <label class="control-label">Address</label>
                 <h4 class="address" id="user-address">0x...</h4>
                 <a id="private-key-toggle" href="javascript:;">Show private key...</a><h4 class="private-key" id="user-private-key" style="display:none;"></h4>
             </div>
-
-            <div class="col-3">
-                <div class="panel panel-warning">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Category: Personal</h3>
-                    </div>
-
-                    <div class="panel-body">
-                        <div class="control-group">
-                            <label class="control-label">Name</label>
-                            <input type="text" class="form-control" name="name" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-3">
-                <div class="panel panel-success">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Category: Contact</h3>
-                    </div>
-
-                    <div class="panel-body">
-                        <div class="control-group">
-                            <label class="control-label">Email Address</label>
-                            <input type="text" class="form-control" name="email" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-3">
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">Category: Address</h3>
-                    </div>
-
-                    <div class="panel-body">
-                        <div class="control-group">
-                            <label class="control-label">City</label>
-                            <input type="text" class="form-control" name="city" />
-                        </div>
-
-                        <div class="control-group">
-                            <label class="control-label">Country</label>
-                            <input type="text" class="form-control" name="country" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="control-group">
-                <button id="create-button" class="btn btn-lg btn-primary">Create</button>
-            </div>
         </div>
+
     </div>
+
 </div>

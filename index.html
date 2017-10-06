@@ -23,6 +23,8 @@
                 <i class="fa fa-2x fa-qrcode"></i><a id="scannerTabButton" href="#securityTab" data-toggle="tab">Scanner</a>
             </div>
 
+            <div id="tabs-divider"></div>
+
             <div class="tab-pane" id="tab-profile">
                 <i class="fa fa-2x fa-user"></i><a id="profileTabButton" href="#profileTab" data-toggle="tab">Profile</a>
             </div>
@@ -30,9 +32,9 @@
 
         <div class="full">
 
-            <div id="scannerContainer" class="full"></div>
+            <div style="display:none" id="scannerContainer" class="full"></div>
 
-            <div style="display:none" id="profileContainer"></div>
+            <div id="profileContainer"></div>
 
         </div>
 
@@ -47,10 +49,13 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
+<script type="text/javascript" src="js/blockies.min.js"></script>
 <script type="text/javascript" src="js/instascan.min.js"></script>
 <script src="js/qrcode.min.js"></script>
 <script src="js/ejs.js"></script>
 <script src="js/alertify.min.js" type="text/javascript"></script>
+
+<script src="js/client.js"></script>
 <script src="js/bundle.js"></script>
 
 </html>

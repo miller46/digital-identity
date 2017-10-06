@@ -37,6 +37,8 @@ body {
     width: 100%;
 }
 
+/** Tabs **/
+
 #main-tabs {
     height: 88px;
     background-color: #5bc0de;
@@ -45,6 +47,7 @@ body {
 #main-tabs div a {
     font-size: 24px;
     color: #ffffff;
+    outline:0;
 }
 
 #main-tabs div i {
@@ -53,11 +56,46 @@ body {
     margin-right: 4px;
 }
 
+#main-tabs #tabs-divider {
+    float: left;
+    width: 1px;
+    background-color: #FFF;
+    height: 100%;
+    padding-top: 0px;
+}
+
 #main-tabs div {
     width: 50%;
     float: left;
     text-align: center;
-    margin-top: 24px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+}
+
+#main-tabs #tab-profile {
+    width: 49%;
+}
+
+/** Profle Tab **/
+
+#icon {
+    width: 96px;
+    height: 96px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 50%;
+    box-shadow: inset rgba(255, 255, 255, 0.6) 0 2px 2px, inset rgba(0, 0, 0, 0.3) 0 -2px 6px;
+}
+
+#display-name-container {
+    width: 180px;
+}
+
+#display-name {
+    margin-left: 32px;
+    height: 64px;
+    margin-top: 16px;
+    font-size: 18px;
 }
 
 .address {
@@ -95,6 +133,41 @@ body {
     padding: 5px 15px;
 }
 
+#copy-icon {
+    height: 16px;
+    width: 16px;
+}
+
+#ethereum-account {
+    width: 48px;
+}
+
+#profile-container {
+
+}
+
+#accounts-container {
+    margin-top: 64px;
+}
+
+#ethereum-account-container {
+    border: 2px solid black;
+    border-radius: 8px;
+}
+
+#ethereum-account-label-container {
+    margin-bottom: 24px;
+}
+
+h3#ethereum-account-label {
+    margin: 0;
+    height: 80px;
+    padding-top: 24px;
+    padding-left: 16px;
+}
+
+/** Scanner Tab **/
+
 video#preview {
     background-color: #000000;
     width: 100%;
@@ -115,6 +188,11 @@ img#qr_cursor {
     max-width: 600px; !important;
 }
 
+/** Utility **/
+
+.left {
+    float: left;
+}
 
 /** Clearfix **/
 

@@ -23,100 +23,22 @@ function main() {
 
     initClickListeners();
 
-    initUserInfo();
-
     loadData();
-}
-
-function mockAuthorize() {
-    var data = {
-        publicKey: "",
-        name: "Test Application",
-        permissions: [
-            "name", "city"
-        ]
-
-    };
-    showAuthorizationDialog(data);
 }
 
 function initUi() {
     initScanner();
+    initProfile();
+}
+
+function initProfile() {
     loadTemplate(Config.baseUrl + '/html/' + 'profile.ejs', 'profileContainer', {});
+    initUserInfo();
 }
 
 function initScanner() {
     loadTemplate(Config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
-
     beginScanner();
-}
-
-function beginScanner() {
-    // var opts = {
-    //     continuous: true,
-    //     video: document.getElementById('preview'),
-    //     mirror: true,
-    //     captureImage: false,
-    //     backgroundScan: false,
-    //     refractoryPeriod: 5000,
-    //     scanPeriod: 1
-    // };
-    //
-    // scanner = new Instascan.Scanner(opts);
-    // scanner.addListener('scan', function (content) {
-    //     console.log(content);
-    //     try {
-    //         var data = JSON.parse(content);
-    //         showAuthorizationDialog(data);
-    //     } catch(e) {
-    //         console.log(e);
-    //     }
-    // });
-    //
-    // Instascan.Camera.getCameras().then(function (cameras) {
-    //     if (cameras.length > 0) {
-    //         console.log(cameras.length + ' cameras found.');
-    //         scanner.start(cameras[0]);
-    //     } else {
-    //         console.error('No cameras found.');
-    //     }
-    // }).catch(function (e) {
-    //     console.error(e);
-    // });
-
-    // var errBack = function(e) {
-    //     console.log("Error", e);
-    // };
-    //
-    // var mediaConfig =  { video: true };
-    // var video = document.getElementById('preview');
-    //
-    // if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    //     navigator.mediaDevices.getUserMedia(mediaConfig).then(function(stream) {
-    //         video.src = window.URL.createObjectURL(stream);
-    //         video.play();
-    //     });
-    // } else if (navigator.getUserMedia) { // Standard
-    //     navigator.getUserMedia(mediaConfig, function(stream) {
-    //         video.src = stream;
-    //         video.play();
-    //     }, errBack);
-    // } else if (navigator.webkitGetUserMedia) { // WebKit-prefixed
-    //     navigator.webkitGetUserMedia(mediaConfig, function(stream){
-    //         video.src = window.webkitURL.createObjectURL(stream);
-    //         video.play();
-    //     }, errBack);
-    // } else if(navigator.mozGetUserMedia) { // Mozilla-prefixed
-    //     navigator.mozGetUserMedia(mediaConfig, function(stream){
-    //         video.src = window.URL.createObjectURL(stream);
-    //         video.play();
-    //     }, errBack);
-    // }
-}
-
-function showAuthorizationDialog(authorizationData) {
-    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', {data: authorizationData});
-    $('#authorize_modal').modal('show');
 }
 
 function initUserInfo() {
@@ -124,14 +46,11 @@ function initUserInfo() {
         userAccount = initUserAccount();
     } else {
         initNewAccount();
-        showNewAccountPrompt(userAccount);
     }
     showUserAccountInfo(userAccount);
 }
 
 function loadData() {
-    showUserAccountInfo(userAccount);
-
     async.waterfall([
         loadContract,
         fetchPersona,
@@ -143,6 +62,31 @@ function loadData() {
             populateFormWithPersonaData(result);
         }
     });
+}
+
+function beginScanner() {
+    scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+    scanner.addListener('scan', function (content) {
+        console.log(content);
+    });
+    Instascan.Camera.getCameras().then(function (cameras) {
+        if (cameras.length > 0) {
+            scanner.start(cameras[0]);
+        } else {
+            console.error('No cameras found.');
+        }
+    }).catch(function (e) {
+        console.error(e);
+    });
+}
+
+function stopScanner() {
+    scanner.stop();
+}
+
+function showAuthorizationDialog(authorizationData) {
+    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', {data: authorizationData});
+    $('#authorize_modal').modal('show');
 }
 
 function showErrorState(error) {
@@ -164,7 +108,7 @@ function showScannerTab() {
 }
 
 function showProfileTab() {
-    scanner.stop();
+    stopScanner();
     $('#scannerContainer').hide();
     $('#profileContainer').show();
 }
@@ -180,13 +124,15 @@ function initUserAccount() {
 function initNewAccount() {
     userAccount = Web3Utility.createAccount();
     CookieUtility.saveCookie("account", JSON.stringify(userAccount));
-    $('#create-button').text("Create");
-    showNewAccountPrompt(userAccount);
 }
 
 function showUserAccountInfo(account) {
     $('#user-address').text(account.address);
     $('#user-private-key').text(account.privateKey);
+
+    document.getElementById('icon').style.backgroundImage = 'url(' + blockies.create({
+        seed: account.address, size: 8, scale: 16
+    }).toDataURL()+')'
 }
 
 function loadContract(callback) {
@@ -342,4 +288,3 @@ function saveIpfsFile(name, data, callback) {
     });
     reader.readAsText(file);
 }
-
