@@ -4,6 +4,7 @@ var Buffer = Web3Utility.Buffer;
 var async = require('async');
 var CookieUtility = require("./js/CookieUtility.js");
 var Crypto = require("./js/Crypto.js");
+var NetworkUtility = require("./js/NetworkUtility.js");
 
 
 //** Globals ** //
@@ -38,7 +39,6 @@ function initProfile() {
 
 function initScanner() {
     loadTemplate(Config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
-    beginScanner();
 }
 
 function initUserInfo() {
@@ -68,7 +68,9 @@ function beginScanner() {
     scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
     scanner.addListener('scan', function (content) {
         console.log(content);
+        parseScannedContent(content);
     });
+
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
             scanner.start(cameras[0]);
@@ -80,13 +82,39 @@ function beginScanner() {
     });
 }
 
+function parseScannedContent(content) {
+    if (content.publicKey && content.hash && content.permissions) {
+        showAuthorizationDialog(content, function() {
+            savePersonaForApp(content.publicKey, function(error, result) {
+                if (error) {
+                    showErrorMessage(error);
+                } else {
+                    NetworkUtility.post(Config.identityRouterUrl + "/" + content.hash, {}, {"publicKey": Crypto.createPublicKey(userAccount.privateKey)}, function (error, response) {
+                        if (error) {
+                            console.error(error);
+                        } else {
+
+                        }
+                    });
+                }
+            });
+        });
+    } else {
+        console.log("invalid format");
+    }
+}
+
 function stopScanner() {
     scanner.stop();
 }
 
-function showAuthorizationDialog(authorizationData) {
+function showAuthorizationDialog(authorizationData, callback) {
     loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', {data: authorizationData});
     $('#authorize_modal').modal('show');
+
+    $('#tfa_send_modal_confirm').click(function() {
+        callback();
+    });
 }
 
 function showErrorState(error) {
@@ -160,41 +188,13 @@ function fetchPersona(contract, callback) {
     });
 }
 
-function fetchIpfsFile(ipfsPointer, callback) {
-    if (!ipfsPointer) {
-        callback(undefined, "{}");
-    } else {
-        ipfs.files.cat("/ipfs/" + ipfsPointer, function (error, stream) {
-            if (error) {
-                console.log(error);
-                callback(error, undefined);
-            } else {
-                var fileParts = [];
-                stream.on("data", function (part) {
-                    fileParts.push(part.toString());
-                });
-
-                stream.on("end", function () {
-                    var fileContents = "";
-                    for (var i = 0; i < fileParts.length; i++) {
-                        fileContents += fileParts[i];
-                    }
-                    var data = Crypto.decrypt(userAccount.privateKey, fileContents);
-                    console.log(data);
-                    callback(undefined, data);
-                });
-            }
-        });
-    }
-}
-
 function populateFormWithPersonaData(fileContents) {
     console.log(fileContents);
     try {
-        var data = JSON.parse(fileContents);
-        for (var field in data) {
-            if (data.hasOwnProperty(field)) {
-                $('input[name="' + field + '"]').val(data[field]);
+        var decrypted = JSON.parse(Crypto.decrypt(userAccount.privateKey, JSON.parse(fileContents).data));
+        for (var field in decrypted) {
+            if (decrypted.hasOwnProperty(field)) {
+                $('input[name="' + field + '"]').val(decrypted[field]);
             }
         }
     } catch(error) {
@@ -229,25 +229,46 @@ function initClickListeners() {
 }
 
 function createPersona() {
-    var fileContents = buildFileContents();
-
     var publicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
+    savePersonaForApp(publicKey, function(error, result) {
+        if (error) {
+            showErrorMessage(error);
+        } else {
+            showSuccessMessage("Information updated successfully")
+        }
+    });
+}
+
+function showErrorMessage(message) {
+    alertify.error(message);
+}
+
+function showSuccessMessage(message) {
+    alertify.success(message);
+}
+
+function savePersonaForApp(publicKey, callback) {
+    var fileContents = buildFileContents();
     var encryptedData = Crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
-    saveIpfsFile(userAccount.address + "-" + userAccount.address + ".txt",
-        encryptedData, function(error, response) {
+
+    saveIpfsFile(userAccount.address + "-" + userAccount.address, encryptedData, function(error, response) {
         if (error) {
             console.log(error);
+            callback(error, undefined);
         } else {
             var publicKey = Crypto.createPublicKey(userAccount.privateKey);
-            var ipfsPointer = response[0].path;
+            var responseJson = JSON.parse(response);
+            var ipfsPointer = responseJson.data[0].hash;
             Web3Utility.send(web3, registryContract, Config.personaRegistryAddress, 'createPersona', [publicKey, ipfsPointer, {
                 gas: 250000,
                 value: 0
             }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
                 if (functionError) {
                     console.log(functionError);
+                    callback(functionError, undefined);
                 } else {
                     console.log(result);
+                    callback(undefined, result);
                 }
             });
         }
@@ -266,25 +287,34 @@ function buildFileContents() {
     return JSON.stringify(data);
 }
 
-function saveIpfsFile(name, data, callback) {
-    var reader = new FileReader();
-    reader.onloadend = function(event) {
-        console.log(event.target.result);
-
-        var buffer = Buffer.from(reader.result);
-        ipfs.files.add(buffer, function(error, response) {
+function fetchIpfsFile(ipfsPointer, callback) {
+    if (!ipfsPointer) {
+        callback(undefined, "{}");
+    } else {
+        NetworkUtility.get(Config.ipfsNodeUrl + "/read/" + ipfsPointer, {}, function (error, response) {
             if (error) {
-                console.log(error);
-                callback(error, undefined);
+                callback(error.message, undefined);
+            } else if (response.error) {
+                callback(response.error, undefined);
             } else {
-                console.log(response);
                 callback(undefined, response);
             }
-        });
-    };
+        })
+    }
+}
 
-    var file = new File([data], name, {
-        type: "text/plain"
+function saveIpfsFile(name, data, callback) {
+    var body = {
+        "name": name,
+        "data": data
+    };
+    NetworkUtility.post(Config.ipfsNodeUrl + "/save", {'Content-Type': 'application/json'}, body, function(error, response) {
+        if (error) {
+            callback(error.message, undefined);
+        } else if (response.error) {
+            callback(response.error, undefined);
+        } else {
+            callback(undefined, response);
+        }
     });
-    reader.readAsText(file);
 }
