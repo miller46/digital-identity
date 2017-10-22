@@ -14,6 +14,7 @@ var ipfs = Web3Utility.initIpfs();
 var registryContract;
 var userAccount;
 var scanner;
+var hasContractRecord = false;
 
 //**  ** //
 
@@ -156,6 +157,7 @@ function initNewAccount() {
 
 function showUserAccountInfo(account) {
     $('#user-address').text(account.address);
+    $('#user-public-key').text(account.publicKey);
     $('#user-private-key').text(account.privateKey);
 
     document.getElementById('icon').style.backgroundImage = 'url(' + blockies.create({
@@ -183,6 +185,8 @@ function fetchPersona(contract, callback) {
             console.log(error);
             callback(error, undefined);
         } else {
+            hasContractRecord = true;
+
             callback(undefined, result);
         }
     });
@@ -191,7 +195,7 @@ function fetchPersona(contract, callback) {
 function populateFormWithPersonaData(fileContents) {
     console.log(fileContents);
     try {
-        var decrypted = JSON.parse(Crypto.decrypt(userAccount.privateKey, JSON.parse(fileContents).data));
+        var decrypted = JSON.parse(Crypto.decrypt(userAccount.privateKey, fileContents));
         for (var field in decrypted) {
             if (decrypted.hasOwnProperty(field)) {
                 $('input[name="' + field + '"]').val(decrypted[field]);
@@ -213,6 +217,10 @@ function showNewAccountPrompt(account) {
 function initClickListeners() {
     $('#create-button').click(function() {
         createPersona();
+    });
+
+    $('#public-key-toggle').click(function() {
+        $('#user-public-key').show();
     });
 
     $('#private-key-toggle').click(function() {
@@ -256,21 +264,38 @@ function savePersonaForApp(publicKey, callback) {
             console.log(error);
             callback(error, undefined);
         } else {
-            var publicKey = Crypto.createPublicKey(userAccount.privateKey);
-            var responseJson = JSON.parse(response);
-            var ipfsPointer = responseJson.data[0].hash;
-            Web3Utility.send(web3, registryContract, Config.personaRegistryAddress, 'createPersona', [publicKey, ipfsPointer, {
-                gas: 250000,
-                value: 0
-            }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
-                if (functionError) {
-                    console.log(functionError);
-                    callback(functionError, undefined);
-                } else {
-                    console.log(result);
-                    callback(undefined, result);
-                }
-            });
+            if (!hasContractRecord) {
+                alertify.confirm("Confirm Transaction", "<h2>Creating your record the first time costs gas.</h2>" +
+                    "<h4>Later you may update it for free. </h4>" +
+                    "</br>" +
+                    "<table>" +
+                    "<tr><td><b>From:</b></td><td>&nbsp;</td><td>" + userAccount.address + "</td></tr>" +
+                    "<tr><td><b>To:</b></td><td>&nbsp;</td><td>" + Config.personaRegistryAddress + "</td></tr>" +
+                    "<tr><td><b>Gas Cost:</b></td><td>&nbsp;</td><td>(Estimated) 0.00134 - 0.00344 ETH</td></tr>" +
+                    "</table>" +
+                    "</br>", function (closeEvent) {
+                        var publicKey = Crypto.createPublicKey(userAccount.privateKey);
+                        var responseJson = JSON.parse(response);
+                        var ipfsPointer = responseJson.data[0].hash;
+
+                        Web3Utility.send(web3, registryContract, Config.personaRegistryAddress, 'createPersona', [publicKey, ipfsPointer, {
+                            gas: 250000,
+                            value: 0
+                        }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
+                            if (functionError) {
+                                console.log(functionError);
+                                callback(functionError, undefined);
+                            } else {
+                                console.log(result);
+                                callback(undefined, result);
+                            }
+                        });
+                }, function() {
+                    showErrorMessage("Record not created");
+                }).set('labels', {ok:'Confirm', cancel:'Cancel'})
+            } else {
+                callback(undefined, response);
+            }
         }
     });
 }
@@ -291,7 +316,7 @@ function fetchIpfsFile(ipfsPointer, callback) {
     if (!ipfsPointer) {
         callback(undefined, "{}");
     } else {
-        NetworkUtility.get(Config.ipfsNodeUrl + "/read/" + ipfsPointer, {}, function (error, response) {
+        NetworkUtility.get(Config.ipfsFetchUrl + "/" +  ipfsPointer, {}, function (error, response) {
             if (error) {
                 callback(error.message, undefined);
             } else if (response.error) {
@@ -308,7 +333,7 @@ function saveIpfsFile(name, data, callback) {
         "name": name,
         "data": data
     };
-    NetworkUtility.post(Config.ipfsNodeUrl + "/save", {'Content-Type': 'application/json'}, body, function(error, response) {
+    NetworkUtility.post(Config.ipfsWriteUrl, {'Content-Type': 'application/json'}, body, function(error, response) {
         if (error) {
             callback(error.message, undefined);
         } else if (response.error) {
