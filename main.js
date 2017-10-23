@@ -139,8 +139,6 @@ function showAuthorizationDialog(data, callback) {
         permissionsTableHtml += "<tr><td>"
         if (data.permissions[i] === "name") {
             permissionsTableHtml += '<i class="fa fa-user"></i>'
-        } else if (data.permissions[i] === "city") {
-            permissionsTableHtml += '<i class="fa fa-building"></i>'
         } else if (data.permissions[i] === "email") {
             permissionsTableHtml += '<i class="fa fa-envelope"></i>'
         } else if (data.permissions[i] === "city") {
@@ -153,19 +151,12 @@ function showAuthorizationDialog(data, callback) {
     }
     permissionsTableHtml += "</table>";
 
-    alertify.confirm("Confirm Transaction", "<h2>Authorizing an app costs gas.</h2>" +
-        "</br>" +
-        "<b>" + data.name + "</b> is requesting access to the following data" +
+    alertify.confirm("Confirm Transaction",
+        "<h2><b>" + data.name + "</b> is requesting access to the following data</h2>" +
         "</br>" +
         "</br>" +
         permissionsTableHtml +
         "</br>" +
-        "</br>" +
-        "<table>" +
-        "<tr><td><b>From:</b></td><td>&nbsp;</td><td>" + userAccount.address + "</td></tr>" +
-        "<tr><td><b>To:</b></td><td>&nbsp;</td><td>" + Config.personaRegistryAddress + "</td></tr>" +
-        "<tr><td><b>Gas Cost:</b></td><td>&nbsp;</td><td>(Estimated) 0.00134 - 0.00344 ETH</td></tr>" +
-        "</table>" +
         "</br>", function (closeEvent) {
             callback(data);
     }, function() {
@@ -259,30 +250,6 @@ function populateFormWithPersonaData(fileContents) {
     } catch(error) {
         console.log(error);
     }
-
-
-    ///TEST ////
-
-    var data = {
-        publicKey: "020769774decf15f5445b569f974d4f4ce3cbc6de933e7ca780a3aa4879d424175",
-        address: "0xf07842d46696116783E895Ff3E70a08f64042133",
-        name: "Test Application",
-        hash: "75c03082-50a4-4ac0-b7b2-769c6c5aec05",
-        permissions: [
-            "name",
-            "city",
-            "country",
-            "email"
-        ]
-    };
-
-    parseScannedContent(JSON.stringify(data), function(error, result) {
-        if (error) {
-            showErrorMessage(error)
-        } else {
-            showSuccessMessage("Shared data successfully!")
-        }
-    });
 }
 
 function showNewAccountPrompt(account) {
@@ -348,8 +315,7 @@ function savePersonaForSelf(callback) {
             var ipfsPointer = responseJson.data[0].hash;
 
             if (ownIpfsHash !== ipfsPointer) {
-                alertify.confirm("Confirm Transaction", "<h2>Creating your record the first time costs gas.</h2>" +
-                    "<h4>Later you may update it for free. </h4>" +
+                alertify.confirm("Confirm Transaction", "<h2>Save record in smart contract.</h2>" +
                     "</br>" +
                     "<table>" +
                     "<tr><td><b>From:</b></td><td>&nbsp;</td><td>" + userAccount.address + "</td></tr>" +
