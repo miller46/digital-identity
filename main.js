@@ -95,32 +95,17 @@ function parseScannedContent(content, callback) {
     var data = JSON.parse(content);
     if (data.publicKey && data.hash && data.permissions) {
         showAuthorizationDialog(data, function(data) {
-            var publicKey = Crypto.createPublicKey(userAccount.privateKey);
 
-            savePersonaForPublicKey(publicKey, function(error, response) {
+            var fileContents = buildFileContents();
+            var encryptedData = Crypto.encrypt(data.publicKey, userAccount.privateKey, fileContents);
+
+            NetworkUtility.post(Config.identityRouterUrl + "/" + data.hash, {}, {"data": encryptedData}, function (error, response) {
                 if (error) {
-                    showErrorMessage(error);
+                    console.error(error);
+                    callback(error, undefined);
                 } else {
-                    var publicKey = Crypto.createPublicKey(userAccount.privateKey);
-                    var responseJson = JSON.parse(response);
-                    var ipfsPointer = responseJson.data[0].hash;
-
-                    createRecordInSmartContract(publicKey, ipfsPointer, function (functionError, response) {
-                        if (functionError) {
-                            console.log(functionError);
-                            callback(functionError, undefined);
-                        } else {
-                            NetworkUtility.post(Config.identityRouterUrl + "/" + data.hash, {}, {"publicKey": publicKey}, function (error, response) {
-                                if (error) {
-                                    console.error(error);
-                                    callback(error, undefined);
-                                } else {
-                                    console.log(response);
-                                    callback(undefined, response);
-                                }
-                            });
-                        }
-                    });
+                    console.log(response);
+                    callback(undefined, response);
                 }
             });
         });
@@ -278,25 +263,26 @@ function populateFormWithPersonaData(fileContents) {
 
     ///TEST ////
 
-    // var data = {
-    //     publicKey: "021331ef59fd3e87e27e72ad8622e0258fd17569918103475ddbb70b60ff761d96",
-    //     name: "Test Application",
-    //     hash: "1d177cc8-3354-4dcf-abe3-1682f60c76d1",
-    //     permissions: [
-    //         "name",
-    //         "city",
-    //         "country",
-    //         "email"
-    //     ]
-    // };
-    //
-    // parseScannedContent(JSON.stringify(data), function(error, result) {
-    //     if (error) {
-    //         showErrorMessage(error)
-    //     } else {
-    //         showSuccessMessage("Shared data successfully!")
-    //     }
-    // });
+    var data = {
+        publicKey: "020769774decf15f5445b569f974d4f4ce3cbc6de933e7ca780a3aa4879d424175",
+        address: "0xf07842d46696116783E895Ff3E70a08f64042133",
+        name: "Test Application",
+        hash: "75c03082-50a4-4ac0-b7b2-769c6c5aec05",
+        permissions: [
+            "name",
+            "city",
+            "country",
+            "email"
+        ]
+    };
+
+    parseScannedContent(JSON.stringify(data), function(error, result) {
+        if (error) {
+            showErrorMessage(error)
+        } else {
+            showSuccessMessage("Shared data successfully!")
+        }
+    });
 }
 
 function showNewAccountPrompt(account) {
@@ -388,23 +374,6 @@ function savePersonaForSelf(callback) {
             } else {
                 callback(undefined, response);
             }
-        }
-    });
-}
-
-function savePersonaForPublicKey(publicKey, callback) {
-    var userPublicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
-
-    var fileContents = buildFileContents();
-    var encryptedData = Crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
-
-    saveIpfsFile(userPublicKey + "-" + publicKey, encryptedData, function(error, response) {
-        if (error) {
-            console.log(error);
-            callback(error, undefined);
-        } else {
-            console.log(response);
-            callback(undefined, response);
         }
     });
 }
