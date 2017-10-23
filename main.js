@@ -14,7 +14,7 @@ var ipfs = Web3Utility.initIpfs();
 var registryContract;
 var userAccount;
 var scanner;
-var hasContractRecord = false;
+var ownIpfsHash;
 
 //**  ** //
 
@@ -69,7 +69,13 @@ function beginScanner() {
     scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
     scanner.addListener('scan', function (content) {
         console.log(content);
-        parseScannedContent(content);
+        parseScannedContent(content, function(error, result) {
+            if (error) {
+                showErrorMessage(error)
+            } else {
+                showSuccessMessage("Shared data successfully!")
+            }
+        });
     });
 
     Instascan.Camera.getCameras().then(function (cameras) {
@@ -83,18 +89,36 @@ function beginScanner() {
     });
 }
 
-function parseScannedContent(content) {
-    if (content.publicKey && content.hash && content.permissions) {
-        showAuthorizationDialog(content, function() {
-            savePersonaForApp(content.publicKey, function(error, result) {
+function parseScannedContent(content, callback) {
+    alert(content);
+
+    var data = JSON.parse(content);
+    if (data.publicKey && data.hash && data.permissions) {
+        showAuthorizationDialog(data, function(data) {
+            var publicKey = Crypto.createPublicKey(userAccount.privateKey);
+
+            savePersonaForPublicKey(publicKey, function(error, response) {
                 if (error) {
                     showErrorMessage(error);
                 } else {
-                    NetworkUtility.post(Config.identityRouterUrl + "/" + content.hash, {}, {"publicKey": Crypto.createPublicKey(userAccount.privateKey)}, function (error, response) {
-                        if (error) {
-                            console.error(error);
-                        } else {
+                    var publicKey = Crypto.createPublicKey(userAccount.privateKey);
+                    var responseJson = JSON.parse(response);
+                    var ipfsPointer = responseJson.data[0].hash;
 
+                    createRecordInSmartContract(publicKey, ipfsPointer, function (functionError, response) {
+                        if (functionError) {
+                            console.log(functionError);
+                            callback(functionError, undefined);
+                        } else {
+                            NetworkUtility.post(Config.identityRouterUrl + "/" + data.hash, {}, {"publicKey": publicKey}, function (error, response) {
+                                if (error) {
+                                    console.error(error);
+                                    callback(error, undefined);
+                                } else {
+                                    console.log(response);
+                                    callback(undefined, response);
+                                }
+                            });
                         }
                     });
                 }
@@ -105,17 +129,63 @@ function parseScannedContent(content) {
     }
 }
 
+function createRecordInSmartContract(publicKey, ipfsPointer, callback) {
+    Web3Utility.send(web3, registryContract, Config.personaRegistryAddress, 'createPersona', [publicKey, ipfsPointer, {
+        gas: 250000,
+        value: 0
+    }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
+        if (functionError) {
+            console.log(functionError);
+            callback(functionError, undefined);
+        } else {
+            console.log(result);
+            callback(undefined, result);
+        }
+    });
+}
+
 function stopScanner() {
     scanner.stop();
 }
 
-function showAuthorizationDialog(authorizationData, callback) {
-    loadTemplate(Config.baseUrl + '/html/' + 'authorize.ejs', 'authorizeContainer', {data: authorizationData});
-    $('#authorize_modal').modal('show');
+function showAuthorizationDialog(data, callback) {
+    var permissionsTableHtml = "<table>"
+    for (var i = 0; i < data.permissions.length; i++) {
+        permissionsTableHtml += "<tr><td>"
+        if (data.permissions[i] === "name") {
+            permissionsTableHtml += '<i class="fa fa-user"></i>'
+        } else if (data.permissions[i] === "city") {
+            permissionsTableHtml += '<i class="fa fa-building"></i>'
+        } else if (data.permissions[i] === "email") {
+            permissionsTableHtml += '<i class="fa fa-envelope"></i>'
+        } else if (data.permissions[i] === "city") {
+            permissionsTableHtml += '<i class="fa fa-building"></i>'
+        } else if (data.permissions[i] === "country") {
+            permissionsTableHtml += '<i class="fa fa-flag"></i>'
+        }
+        permissionsTableHtml += "</td><td>&nbsp;</td><td>" + data.permissions[i] + "</td>";
+        permissionsTableHtml += "</tr>"
+    }
+    permissionsTableHtml += "</table>";
 
-    $('#tfa_send_modal_confirm').click(function() {
-        callback();
-    });
+    alertify.confirm("Confirm Transaction", "<h2>Authorizing an app costs gas.</h2>" +
+        "</br>" +
+        "<b>" + data.name + "</b> is requesting access to the following data" +
+        "</br>" +
+        "</br>" +
+        permissionsTableHtml +
+        "</br>" +
+        "</br>" +
+        "<table>" +
+        "<tr><td><b>From:</b></td><td>&nbsp;</td><td>" + userAccount.address + "</td></tr>" +
+        "<tr><td><b>To:</b></td><td>&nbsp;</td><td>" + Config.personaRegistryAddress + "</td></tr>" +
+        "<tr><td><b>Gas Cost:</b></td><td>&nbsp;</td><td>(Estimated) 0.00134 - 0.00344 ETH</td></tr>" +
+        "</table>" +
+        "</br>", function (closeEvent) {
+            callback(data);
+    }, function() {
+        showErrorMessage("App not authorized");
+    }).set('labels', {ok:'Confirm', cancel:'Cancel'})
 }
 
 function showErrorState(error) {
@@ -157,7 +227,7 @@ function initNewAccount() {
 
 function showUserAccountInfo(account) {
     $('#user-address').text(account.address);
-    $('#user-public-key').text(account.publicKey);
+    $('#user-public-key').text(Crypto.createPublicKey(userAccount.privateKey).toString());
     $('#user-private-key').text(account.privateKey);
 
     document.getElementById('icon').style.backgroundImage = 'url(' + blockies.create({
@@ -185,8 +255,8 @@ function fetchPersona(contract, callback) {
             console.log(error);
             callback(error, undefined);
         } else {
-            hasContractRecord = true;
-
+            ownIpfsHash = result;
+            console.log(result);
             callback(undefined, result);
         }
     });
@@ -204,6 +274,29 @@ function populateFormWithPersonaData(fileContents) {
     } catch(error) {
         console.log(error);
     }
+
+
+    ///TEST ////
+
+    // var data = {
+    //     publicKey: "021331ef59fd3e87e27e72ad8622e0258fd17569918103475ddbb70b60ff761d96",
+    //     name: "Test Application",
+    //     hash: "1d177cc8-3354-4dcf-abe3-1682f60c76d1",
+    //     permissions: [
+    //         "name",
+    //         "city",
+    //         "country",
+    //         "email"
+    //     ]
+    // };
+    //
+    // parseScannedContent(JSON.stringify(data), function(error, result) {
+    //     if (error) {
+    //         showErrorMessage(error)
+    //     } else {
+    //         showSuccessMessage("Shared data successfully!")
+    //     }
+    // });
 }
 
 function showNewAccountPrompt(account) {
@@ -237,8 +330,7 @@ function initClickListeners() {
 }
 
 function createPersona() {
-    var publicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
-    savePersonaForApp(publicKey, function(error, result) {
+    savePersonaForSelf(function(error, result) {
         if (error) {
             showErrorMessage(error);
         } else {
@@ -255,16 +347,21 @@ function showSuccessMessage(message) {
     alertify.success(message);
 }
 
-function savePersonaForApp(publicKey, callback) {
+function savePersonaForSelf(callback) {
+    var publicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
+
     var fileContents = buildFileContents();
     var encryptedData = Crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
 
-    saveIpfsFile(userAccount.address + "-" + userAccount.address, encryptedData, function(error, response) {
+    saveIpfsFile(publicKey + "-" + publicKey, encryptedData, function(error, response) {
         if (error) {
             console.log(error);
             callback(error, undefined);
         } else {
-            if (!hasContractRecord) {
+            var responseJson = JSON.parse(response);
+            var ipfsPointer = responseJson.data[0].hash;
+
+            if (ownIpfsHash !== ipfsPointer) {
                 alertify.confirm("Confirm Transaction", "<h2>Creating your record the first time costs gas.</h2>" +
                     "<h4>Later you may update it for free. </h4>" +
                     "</br>" +
@@ -275,13 +372,8 @@ function savePersonaForApp(publicKey, callback) {
                     "</table>" +
                     "</br>", function (closeEvent) {
                         var publicKey = Crypto.createPublicKey(userAccount.privateKey);
-                        var responseJson = JSON.parse(response);
-                        var ipfsPointer = responseJson.data[0].hash;
 
-                        Web3Utility.send(web3, registryContract, Config.personaRegistryAddress, 'createPersona', [publicKey, ipfsPointer, {
-                            gas: 250000,
-                            value: 0
-                        }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
+                        createRecordInSmartContract(publicKey, ipfsPointer, function (functionError, result) {
                             if (functionError) {
                                 console.log(functionError);
                                 callback(functionError, undefined);
@@ -300,6 +392,23 @@ function savePersonaForApp(publicKey, callback) {
     });
 }
 
+function savePersonaForPublicKey(publicKey, callback) {
+    var userPublicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
+
+    var fileContents = buildFileContents();
+    var encryptedData = Crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
+
+    saveIpfsFile(userPublicKey + "-" + publicKey, encryptedData, function(error, response) {
+        if (error) {
+            console.log(error);
+            callback(error, undefined);
+        } else {
+            console.log(response);
+            callback(undefined, response);
+        }
+    });
+}
+
 function buildFileContents() {
     var fields = ["name", "email", "city", "country"];
 
@@ -314,7 +423,7 @@ function buildFileContents() {
 
 function fetchIpfsFile(ipfsPointer, callback) {
     if (!ipfsPointer) {
-        callback(undefined, "{}");
+        callback("No pointer found", undefined);
     } else {
         NetworkUtility.get(Config.ipfsFetchUrl + "/" +  ipfsPointer, {}, function (error, response) {
             if (error) {
@@ -322,7 +431,8 @@ function fetchIpfsFile(ipfsPointer, callback) {
             } else if (response.error) {
                 callback(response.error, undefined);
             } else {
-                callback(undefined, response);
+                callback(undefined, JSON.parse(response).data);
+                // callback(undefined, response);
             }
         })
     }

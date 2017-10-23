@@ -14,16 +14,19 @@ var FileUtility = require('./FileUtility.js');
 var NetworkUtility = require('./NetworkUtility.js');
 
 function initWeb3(web3) {
-    if (typeof web3 !== 'undefined' && typeof Web3 !== 'undefined') {
-        //is MetaMask
-        web3 = new Web3(web3.currentProvider);
-    } else if (typeof Web3 !== 'undefined' && window.location.protocol !== "https:") {
-        //is Ethereum Client (e.g. Mist)
-        web3 = new Web3(new Web3.providers.HttpProvider(Config.ethProvider));
-    } else {
-        //no web3 provider
-        web3 = new Web3();
-    }
+    // if (typeof web3 !== 'undefined' && typeof Web3 !== 'undefined') {
+    //     //is MetaMask
+    //     web3 = new Web3(web3.currentProvider);
+    // } else if (typeof Web3 !== 'undefined' && window.location.protocol !== "https:") {
+    //     //is Ethereum Client (e.g. Mist)
+    //     web3 = new Web3(new Web3.providers.HttpProvider(Config.ethProvider));
+    // } else {
+    //     //no web3 provider
+    //     web3 = new Web3();
+    // }
+
+    web3 = new Web3();
+
     return web3;
 }
 
@@ -75,29 +78,32 @@ function call(web3, contract, address, functionName, args, callback) {
             }
         });
     }
-    try {
-        if (web3.currentProvider) {
-            var data = contract[functionName].getData.apply(null, args);
-            web3.eth.call({to: address, data: data}, function(err, result){
-                if (!err) {
-                    var functionAbi = contract.abi.find(function(element, index, array) {return element.name==functionName});
-                    var solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
-                    try {
-                        var result = solidityFunction.unpackOutput(result);
-                        callback(undefined, result);
-                    } catch (err) {
-                        proxy(1);
-                    }
-                } else {
-                    proxy(1);
-                }
-            });
-        } else {
-            proxy(1);
-        }
-    } catch(err) {
-        proxy(1);
-    }
+
+    proxy(1);
+
+    // try {
+    //     if (web3.currentProvider) {
+    //         var data = contract[functionName].getData.apply(null, args);
+    //         web3.eth.call({to: address, data: data}, function(err, result){
+    //             if (!err) {
+    //                 var functionAbi = contract.abi.find(function(element, index, array) {return element.name==functionName});
+    //                 var solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
+    //                 try {
+    //                     var result = solidityFunction.unpackOutput(result);
+    //                     callback(undefined, result);
+    //                 } catch (err) {
+    //                     proxy(1);
+    //                 }
+    //             } else {
+    //                 proxy(1);
+    //             }
+    //         });
+    //     } else {
+    //         proxy(1);
+    //     }
+    // } catch(err) {
+    //     proxy(1);
+    // }
 }
 
 function callContractFunction(web3, contract, address, functionName, args, callback) {
@@ -135,27 +141,29 @@ function callContractFunction(web3, contract, address, functionName, args, callb
         });
     }
     try {
-        if (web3.currentProvider) {
-            var data = contract[functionName].getData.apply(null, args);
-            web3.eth.call({to: address, data: data}, function(callError, result) {
-                if (!callError) {
-                    var functionAbi = contract.abi.find(function(element, index, array) {
-                        return element.name === functionName
-                    });
-                    var solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
-                    try {
-                        var output = solidityFunction.unpackOutput(result);
-                        callback(undefined, output);
-                    } catch (resultError) {
-                        callback(resultError, undefined);
-                    }
-                } else {
-                    callback(callError, undefined);
-                }
-            });
-        } else {
-            proxy(1);
-        }
+        proxy(1);
+
+        // if (web3.currentProvider) {
+        //     var data = contract[functionName].getData.apply(null, args);
+        //     web3.eth.call({to: address, data: data}, function(callError, result) {
+        //         if (!callError) {
+        //             var functionAbi = contract.abi.find(function(element, index, array) {
+        //                 return element.name === functionName
+        //             });
+        //             var solidityFunction = new SolidityFunction(web3.Eth, functionAbi, address);
+        //             try {
+        //                 var output = solidityFunction.unpackOutput(result);
+        //                 callback(undefined, output);
+        //             } catch (resultError) {
+        //                 callback(resultError, undefined);
+        //             }
+        //         } else {
+        //             callback(callError, undefined);
+        //         }
+        //     });
+        // } else {
+        //     proxy(1);
+        // }
     } catch(contractError) {
         callback(contractError, undefined);
     }
@@ -254,25 +262,28 @@ function send(web3, contract, address, functionName, args, fromAddress, privateK
         } catch (err) {
             callback(err, undefined);
         }
-        try {
-            if (web3.currentProvider) {
-                options.from = fromAddress;
-                options.gas = options.gasLimit;
-                delete options.gasLimit;
-                web3.eth.sendTransaction(options, function(err, hash) {
-                    if (!err) {
-                        callback(undefined, {txHash: hash, nonce: nonce + 1});
-                    } else {
-                        console.log(err);
-                        proxy();
-                    }
-                })
-            } else {
-                proxy();
-            }
-        } catch (err) {
-            proxy();
-        }
+
+        proxy();
+
+        // try {
+        //     if (web3.currentProvider) {
+        //         options.from = fromAddress;
+        //         options.gas = options.gasLimit;
+        //         delete options.gasLimit;
+        //         web3.eth.sendTransaction(options, function(err, hash) {
+        //             if (!err) {
+        //                 callback(undefined, {txHash: hash, nonce: nonce + 1});
+        //             } else {
+        //                 console.log(err);
+        //                 proxy();
+        //             }
+        //         })
+        //     } else {
+        //         proxy();
+        //     }
+        // } catch (err) {
+        //     proxy();
+        // }
     });
 }
 
@@ -353,8 +364,8 @@ function sign(web3, address, value, privateKey, callback) {
 
 function getNextNonce(web3, address, callback) {
     function proxy() {
-        var url = 'https://' + (Config.isTestNet ? Config.networkName : 'api') + '.etherscan.io/api?module=proxy&action=eth' +
-            'GetTransactionCount&address=' + address + '&tag=latest';
+        var url = 'https://' + (Config.isTestNet ? Config.networkName : 'api') + '.etherscan.io/api?module=proxy&action=' +
+            'eth_getTransactionCount&address=' + address + '&tag=latest';
         if (Config.etherscanApiKey) url += '&apikey=' + Config.etherscanApiKey;
         NetworkUtility.get(url, {}, function(err, body) {
             if (!err) {
@@ -366,23 +377,26 @@ function getNextNonce(web3, address, callback) {
             }
         });
     }
-    try {
-        if (web3.currentProvider) {
-            web3.eth.getTransactionCount(address, function(err, result) {
-                if (!err) {
-                    var nextNonce = Number(result);
-                    //Note. initial nonce is 2^20 on testnet, but getTransactionCount already starts at 2^20.
-                    callback(undefined, nextNonce);
-                } else {
-                    proxy();
-                }
-            });
-        } else {
-            proxy();
-        }
-    } catch(err) {
-        proxy();
-    }
+
+    proxy();
+
+    // try {
+    //     if (web3.currentProvider) {
+    //         web3.eth.getTransactionCount(address, function(err, result) {
+    //             if (!err) {
+    //                 var nextNonce = Number(result);
+    //                 //Note. initial nonce is 2^20 on testnet, but getTransactionCount already starts at 2^20.
+    //                 callback(undefined, nextNonce);
+    //             } else {
+    //                 proxy();
+    //             }
+    //         });
+    //     } else {
+    //         proxy();
+    //     }
+    // } catch(err) {
+    //     proxy();
+    // }
 }
 
 function createAccount() {
