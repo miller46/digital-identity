@@ -96,7 +96,7 @@ function parseScannedContent(content, callback) {
     if (data.publicKey && data.hash && data.permissions) {
         showAuthorizationDialog(data, function(data) {
 
-            var fileContents = buildFileContents();
+            var fileContents = buildFileContents(data.permissions);
             var encryptedData = Crypto.encrypt(data.publicKey, userAccount.privateKey, fileContents);
 
             NetworkUtility.post(Config.identityRouterUrl + "/" + data.hash, {}, {"data": encryptedData}, function (error, response) {
@@ -303,7 +303,7 @@ function showSuccessMessage(message) {
 function savePersonaForSelf(callback) {
     var publicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
 
-    var fileContents = buildFileContents();
+    var fileContents = buildFileContents(["name", "email", "city", "country"]);
     var encryptedData = Crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
 
     saveIpfsFile(publicKey + "-" + publicKey, encryptedData, function(error, response) {
@@ -344,9 +344,7 @@ function savePersonaForSelf(callback) {
     });
 }
 
-function buildFileContents() {
-    var fields = ["name", "email", "city", "country"];
-
+function buildFileContents(fields) {
     var data = {};
     for (var i = 0; i < fields.length; i++) {
         var field = fields[i];
