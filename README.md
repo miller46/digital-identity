@@ -24,16 +24,11 @@ The works by creating personas which are a mapping of data to an Ethereum addres
 **NOTES**
 
 * The public key used to encryption is derived from the private key and is NOT the public key of the Ethereum address.
-* This only deploys data to local IPFS nodes at the moment.
+* This deploys data to a single IPFS node at the moment.  I plan to move to Infura shortly.
 * This is still a little raw, and I plan to move it to a library
-
-**Prerequisites**
-
-This app requires node and uses IPFS to store files.  You must first install IPFS https://ipfs.io/docs/install/
 
 **To run** 
 
     npm install
-    ipfs daemon
     browserify main.js > js/bundle.js
     node app
