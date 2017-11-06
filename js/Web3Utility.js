@@ -78,7 +78,6 @@ function call(web3, contract, address, functionName, args, callback) {
             }
         });
     }
-
     proxy(1);
 
     // try {

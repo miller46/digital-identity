@@ -6,7 +6,6 @@ var CookieUtility = require("./js/CookieUtility.js");
 var Crypto = require("./js/Crypto.js");
 var NetworkUtility = require("./js/NetworkUtility.js");
 
-
 //** Globals ** //
 
 var web3 = Web3Utility.initWeb3(window.web3);
@@ -80,6 +79,7 @@ function beginScanner() {
 
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
+            console.log(cameras.length + ' cameras found.');
             scanner.start(cameras[0]);
         } else {
             console.error('No cameras found.');
@@ -182,6 +182,7 @@ function showScannerTab() {
 
 function showProfileTab() {
     stopScanner();
+
     $('#scannerContainer').hide();
     $('#profileContainer').show();
 }
