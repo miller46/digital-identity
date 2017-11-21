@@ -5,6 +5,7 @@ var async = require('async');
 var CookieUtility = require("./js/CookieUtility.js");
 var Crypto = require("./js/Crypto.js");
 var NetworkUtility = require("./js/NetworkUtility.js");
+var IpfsHelper = require("./js/IpfsHelper.js");
 
 //** Globals ** //
 
@@ -310,8 +311,7 @@ function savePersonaForSelf(callback) {
             console.log(error);
             callback(error, undefined);
         } else {
-            var responseJson = JSON.parse(response);
-            var ipfsPointer = responseJson.data[0].hash;
+            var ipfsPointer = response[0].hash;
 
             if (ownIpfsHash !== ipfsPointer) {
                 alertify.confirm("Confirm Transaction", "<h2>Save record in smart contract.</h2>" +
@@ -363,23 +363,16 @@ function fetchIpfsFile(ipfsPointer, callback) {
             } else if (response.error) {
                 callback(response.error, undefined);
             } else {
-                callback(undefined, JSON.parse(response).data);
-                // callback(undefined, response);
+                callback(undefined, response);
             }
         })
     }
 }
 
 function saveIpfsFile(name, data, callback) {
-    var body = {
-        "name": name,
-        "data": data
-    };
-    NetworkUtility.post(Config.ipfsWriteUrl, {'Content-Type': 'application/json'}, body, function(error, response) {
+    IpfsHelper.saveIpfsFile(name, data, function(error, response) {
         if (error) {
             callback(error.message, undefined);
-        } else if (response.error) {
-            callback(response.error, undefined);
         } else {
             callback(undefined, response);
         }
