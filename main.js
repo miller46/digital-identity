@@ -81,7 +81,9 @@ function beginScanner() {
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
             console.log(cameras.length + ' cameras found.');
-            scanner.start(cameras[0]);
+            if (scanner) {
+              scanner.start(cameras[0]);
+            }
         } else {
             console.error('No cameras found.');
         }
@@ -129,7 +131,9 @@ function createRecordInSmartContract(publicKey, ipfsPointer, callback) {
 }
 
 function stopScanner() {
-    scanner.stop();
+    if (scanner) {
+      scanner.stop();
+    }
 }
 
 function showAuthorizationDialog(data, callback) {
