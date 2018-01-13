@@ -1,0 +1,572 @@
+[
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_type",
+				"type": "uint256"
+			}
+		],
+		"name": "getKeysByType",
+		"outputs": [
+			{
+				"name": "_keys",
+				"type": "address[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_key",
+				"type": "address"
+			}
+		],
+		"name": "getKeyType",
+		"outputs": [
+			{
+				"name": "keyType",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_id",
+				"type": "bytes32"
+			},
+			{
+				"name": "_approve",
+				"type": "bool"
+			}
+		],
+		"name": "approve",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_claimId",
+				"type": "bytes32"
+			}
+		],
+		"name": "removeClaim",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_key",
+				"type": "address"
+			}
+		],
+		"name": "removeKey",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_claimType",
+				"type": "uint256"
+			}
+		],
+		"name": "getClaimsIdByType",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bytes32[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_claimType",
+				"type": "uint256"
+			},
+			{
+				"name": "_issuer",
+				"type": "address"
+			},
+			{
+				"name": "_signatureType",
+				"type": "uint256"
+			},
+			{
+				"name": "_signature",
+				"type": "bytes32"
+			},
+			{
+				"name": "_claim",
+				"type": "bytes32"
+			},
+			{
+				"name": "_uri",
+				"type": "string"
+			}
+		],
+		"name": "addClaim",
+		"outputs": [
+			{
+				"name": "claimId",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_key",
+				"type": "address"
+			},
+			{
+				"name": "_type",
+				"type": "uint256"
+			}
+		],
+		"name": "addKey",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_oldKey",
+				"type": "address"
+			},
+			{
+				"name": "_newKey",
+				"type": "address"
+			}
+		],
+		"name": "replaceKey",
+		"outputs": [
+			{
+				"name": "success",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_to",
+				"type": "address"
+			},
+			{
+				"name": "_value",
+				"type": "uint256"
+			},
+			{
+				"name": "_data",
+				"type": "bytes32"
+			}
+		],
+		"name": "execute",
+		"outputs": [
+			{
+				"name": "executionId",
+				"type": "bytes32"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "_claimId",
+				"type": "bytes32"
+			}
+		],
+		"name": "getClaim",
+		"outputs": [
+			{
+				"name": "claimType",
+				"type": "uint256"
+			},
+			{
+				"name": "issuer",
+				"type": "address"
+			},
+			{
+				"name": "signatureType",
+				"type": "uint256"
+			},
+			{
+				"name": "signature",
+				"type": "bytes32"
+			},
+			{
+				"name": "claim",
+				"type": "bytes32"
+			},
+			{
+				"name": "uri",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "claimId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"name": "claimType",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"name": "issuer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "signatureType",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "signature",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "claim",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "uri",
+				"type": "string"
+			}
+		],
+		"name": "ClaimRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "claimId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"name": "claimType",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"name": "issuer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "signatureType",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "signature",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "claim",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "uri",
+				"type": "string"
+			}
+		],
+		"name": "ClaimAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "claimId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"name": "claimType",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"name": "issuer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "signatureType",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "signature",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "claim",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "uri",
+				"type": "string"
+			}
+		],
+		"name": "ClaimRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "claimId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"name": "claimType",
+				"type": "uint256"
+			},
+			{
+				"indexed": true,
+				"name": "issuer",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"name": "signatureType",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "signature",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "claim",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "uri",
+				"type": "string"
+			}
+		],
+		"name": "ClaimChanged",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "key",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "keyType",
+				"type": "uint256"
+			}
+		],
+		"name": "KeyAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "key",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "keyType",
+				"type": "uint256"
+			}
+		],
+		"name": "KeyRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "oldKey",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "newKey",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "keyType",
+				"type": "uint256"
+			}
+		],
+		"name": "KeyReplaced",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "executionId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "value",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "data",
+				"type": "bytes32"
+			}
+		],
+		"name": "ExecutionRequested",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "executionId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": true,
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"name": "value",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"name": "data",
+				"type": "bytes32"
+			}
+		],
+		"name": "Executed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"name": "executionId",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"name": "approved",
+				"type": "bool"
+			}
+		],
+		"name": "Approved",
+		"type": "event"
+	}
+]
