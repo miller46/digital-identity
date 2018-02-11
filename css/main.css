@@ -41,7 +41,7 @@ body {
 #main-tabs {
     position: absolute;
     width: 100%;
-    z-index: 9999;
+    z-index: 999;
     top: 0;
     height: 88px;
     background-color: #5bc0de;
@@ -191,10 +191,34 @@ img#qr_cursor {
     margin-left: -145px;
 }
 
+/* authorize container */
+#authorizeContainer {
+    z-index: 9999;
+}
+
+.permissions td {
+    padding-right: 16px;
+    padding-top: 8px;
+    font-size: 16px;
+    text-align: center;
+}
+
 /* alertify overide */
 
 .alertify .ajs-dialog {
     max-width: 600px; !important;
+}
+
+.ajs-ok {
+    background-color: #5cb85c;
+    color: white;
+    border-radius: 4px;
+}
+
+.ajs-cancel {
+    background-color: #d9534f;
+    color: white;
+    border-radius: 4px;
 }
 
 /** Utility **/

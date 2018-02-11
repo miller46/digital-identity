@@ -73,7 +73,8 @@ function beginScanner() {
             if (error) {
                 showErrorMessage(error)
             } else {
-                showSuccessMessage("Shared data successfully!")
+                var txHash = "0xd9e0eec242464a6f6d48566dc193cb5802262517ed906916f89d3b6d9440ee59";
+                showSuccessMessage("Shared data successfully: \n + <a href='https://kovan.etherscan.io/tx" + txHash + "'>Transaction: " + txHash + "</a>" )
             }
         });
     });
@@ -145,17 +146,17 @@ function stopScanner() {
 }
 
 function showAuthorizationDialog(data, callback) {
-    var permissionsTableHtml = "<table>"
+    var permissionsTableHtml = "<table class='permissions'>"
     for (var i = 0; i < data.permissions.length; i++) {
         permissionsTableHtml += "<tr><td>"
         if (data.permissions[i] === "name") {
-            permissionsTableHtml += '<i class="fa fa-user"></i>'
+            permissionsTableHtml += '<i class="fa fa-user fa-2x"></i>'
         } else if (data.permissions[i] === "email") {
-            permissionsTableHtml += '<i class="fa fa-envelope"></i>'
+            permissionsTableHtml += '<i class="fa fa-envelope fa-2x"></i>'
         } else if (data.permissions[i] === "city") {
-            permissionsTableHtml += '<i class="fa fa-building"></i>'
+            permissionsTableHtml += '<i class="fa fa-building fa-2x"></i>'
         } else if (data.permissions[i] === "country") {
-            permissionsTableHtml += '<i class="fa fa-flag"></i>'
+            permissionsTableHtml += '<i class="fa fa-flag fa-2x"></i>'
         }
         permissionsTableHtml += "</td><td>&nbsp;</td><td>" + data.permissions[i] + "</td>";
         permissionsTableHtml += "</tr>"
@@ -163,7 +164,8 @@ function showAuthorizationDialog(data, callback) {
     permissionsTableHtml += "</table>";
 
     alertify.confirm("Confirm Transaction",
-        "<h2><b>" + data.name + "</b> is requesting access to the following data</h2>" +
+        "<div id='alert-icon'></div><h2><b>" + data.name + "</b></h2> " +
+        "<h4>is requesting access to the following data: </h4>" +
         "</br>" +
         "</br>" +
         permissionsTableHtml +
@@ -172,7 +174,11 @@ function showAuthorizationDialog(data, callback) {
             callback(data);
     }, function() {
         showErrorMessage("App not authorized");
-    }).set('labels', {ok:'Confirm', cancel:'Cancel'})
+    }).set('labels', {ok:'Approve', cancel:'Reject'});
+
+    document.getElementById('alert-icon').style.backgroundImage = 'url(' + blockies.create({
+        seed: account.address, size: 8, scale: 16
+    }).toDataURL()+')'
 }
 
 function showErrorState(error) {
@@ -299,7 +305,8 @@ function createPersona() {
         if (error) {
             showErrorMessage(error);
         } else {
-            showSuccessMessage("Information updated successfully")
+            var txHash = result.txHash;
+            showSuccessMessage("Information updated successfully: \n + <a href='https://kovan.etherscan.io/tx" + txHash + "'>Transaction: " + txHash + "</a>" )
         }
     });
 }
@@ -347,7 +354,7 @@ function savePersonaForSelf(callback) {
                         });
                 }, function() {
                     showErrorMessage("Record not created");
-                }).set('labels', {ok:'Confirm', cancel:'Cancel'})
+                }).set('labels', {ok:'Approve', cancel:'Reject'})
             } else {
                 callback(undefined, response);
             }
