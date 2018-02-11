@@ -74,7 +74,7 @@ function beginScanner() {
                 showErrorMessage(error)
             } else {
                 var txHash = "0xd9e0eec242464a6f6d48566dc193cb5802262517ed906916f89d3b6d9440ee59";
-                showSuccessMessage("Shared data successfully: \n + <a href='https://kovan.etherscan.io/tx" + txHash + "'>Transaction: " + txHash + "</a>" )
+                showSuccessMessage("Shared data successfully: \n <a href='https://kovan.etherscan.io/tx" + txHash + "'>View transaction</a>" )
             }
         });
     });
@@ -306,7 +306,7 @@ function createPersona() {
             showErrorMessage(error);
         } else {
             var txHash = result.txHash;
-            showSuccessMessage("Information updated successfully: \n + <a href='https://kovan.etherscan.io/tx" + txHash + "'>Transaction: " + txHash + "</a>" )
+            showSuccessMessage("Information updated successfully: \n <a href='https://kovan.etherscan.io/tx" + txHash + "'>View transaction</a>" )
         }
     });
 }
