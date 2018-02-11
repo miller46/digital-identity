@@ -87,14 +87,10 @@ function beginScanner() {
 
             if (scanner) {
                 try {
-                    scanner.start(cameras[index]);
+                    scanner.start(cameras[0]);
                 } catch(e) {
                     console.log(e);
                     console.log(e.message);
-
-                    if (index > 0) {
-                        scanner.start(cameras[0]);
-                    }
                 }
             }
         } else {
