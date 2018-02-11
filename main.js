@@ -80,9 +80,9 @@ function beginScanner() {
 
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
-            console.log(cameras.length + ' cameras found.');
+            var index = cameras.length > 1 ? 1 : 0;
             if (scanner) {
-              scanner.start(cameras[0]);
+              scanner.start(cameras[index]);
             }
         } else {
             console.error('No cameras found.');
@@ -323,7 +323,7 @@ function savePersonaForSelf(callback) {
                     "<table>" +
                     "<tr><td><b>From:</b></td><td>&nbsp;</td><td>" + userAccount.address + "</td></tr>" +
                     "<tr><td><b>To:</b></td><td>&nbsp;</td><td>" + Config.personaRegistryAddress + "</td></tr>" +
-                    "<tr><td><b>Gas Cost:</b></td><td>&nbsp;</td><td>(Estimated) 0.00134 - 0.00344 ETH</td></tr>" +
+                    "<tr><td><b>Gas Cost:</b></td><td>&nbsp;</td><td>(Estimated) 0.00052 - 0.00172 ETH</td></tr>" +
                     "</table>" +
                     "</br>", function (closeEvent) {
                         var publicKey = Crypto.createPublicKey(userAccount.privateKey);
