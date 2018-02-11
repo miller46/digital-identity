@@ -66,7 +66,7 @@ function loadData() {
 }
 
 function beginScanner() {
-    scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+    scanner = new Instascan.Scanner({ video: document.getElementById('preview'), facingMode: 'environment' });
     scanner.addListener('scan', function (content) {
         console.log(content);
         parseScannedContent(content, function(error, result) {
@@ -80,7 +80,7 @@ function beginScanner() {
 
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
-            var index = cameras.length > 1 ? 1 : 0;
+            var index = (cameras.length > 1 && cameras[1]) ? 1 : 0;
             if (scanner) {
               scanner.start(cameras[index]);
             }
