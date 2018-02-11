@@ -80,25 +80,13 @@ function beginScanner() {
 
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
-            for (var i = 0; i < cameras.length; i++) {
-                var camera = cameras[i];
-                if (camera.name.indexOf('back') !== -1) {
-                    console.log(camera.name);
-                    break;
-                }
-            }
+            // todo fix rear camera issue
             var index = (cameras.length > 1 && cameras[1]) ? 1 : 0;
             console.log(index);
 
             if (scanner) {
                 try {
                     scanner.start(cameras[0]);
-
-                    console.log("starting camera 0");
-                    if (index > 0) {
-                        scanner.start(cameras[index]);
-                    }
-                    console.log("starting camera 1");
                 } catch(e) {
                     console.log(e);
                     console.log(e.message);

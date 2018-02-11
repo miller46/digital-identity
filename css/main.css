@@ -24,7 +24,7 @@ body {
 }
 
 #main-container {
-    height: 100vh;
+    height: 100%;
     width: 100%;
 }
 
@@ -147,6 +147,7 @@ body {
 
 #profile-container {
     margin-top: 64px;
+    height: 100%;
 }
 
 #accounts-container {
@@ -171,6 +172,10 @@ h3#ethereum-account-label {
 }
 
 /** Scanner Tab **/
+
+#scannerContainer {
+    height: 100vh;
+}
 
 video#preview {
     background-color: #000000;
