@@ -80,7 +80,16 @@ function beginScanner() {
 
     Instascan.Camera.getCameras().then(function (cameras) {
         if (cameras.length > 0) {
+            for (var i = 0; i < cameras.length; i++) {
+                var camera = cameras[i];
+                if (camera.name.indexOf('back') !== -1) {
+                    console.log(camera.name);
+                    break;
+                }
+            }
             var index = (cameras.length > 1 && cameras[1]) ? 1 : 0;
+            console.log(index);
+
             if (scanner) {
               scanner.start(cameras[index]);
             }
