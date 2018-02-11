@@ -92,7 +92,13 @@ function beginScanner() {
 
             if (scanner) {
                 try {
-                    scanner.start(cameras[index]);
+                    scanner.start(cameras[0]);
+
+                    console.log("starting camera 0");
+                    if (index > 0) {
+                        scanner.start(cameras[index]);
+                    }
+                    console.log("starting camera 1");
                 } catch(e) {
                     console.log(e);
                     console.log(e.message);
