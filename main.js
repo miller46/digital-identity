@@ -97,7 +97,7 @@ function beginScanner() {
             console.error('No cameras found.');
         }
     }).catch(function (e) {
-        console.error(e);
+        console.error(e.message);
     });
 }
 
