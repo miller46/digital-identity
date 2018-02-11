@@ -91,7 +91,12 @@ function beginScanner() {
             console.log(index);
 
             if (scanner) {
-              scanner.start(cameras[index]);
+                try {
+                    scanner.start(cameras[index]);
+                } catch(e) {
+                    console.log(e);
+                    console.log(e.message);
+                }
             }
         } else {
             console.error('No cameras found.');
