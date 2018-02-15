@@ -1,34 +1,31 @@
-pragma solidity ^0.4.9;
+pragma solidity ^0.4.17;
 
 contract PersonaRegistry {
 
-    struct Persona {
-        mapping(address => string) ipfsPointer; //entity => pointer
+    mapping(address => mapping(address => mapping(bytes32 => bytes32))) public claims;
+
+    event ClaimSet(address indexed issuer, address indexed subject,
+        bytes32 indexed key, bytes32 value, uint updatedAt);
+
+    event ClaimRemoved(address indexed issuer, address indexed subject,
+        bytes32 indexed key, uint removedAt);
+
+    function setClaim(address subject, bytes32 key, bytes32 value) public {
+        claims[msg.sender][subject][key] = value;
+        ClaimSet(msg.sender, subject, key, value, now);
     }
 
-    mapping(address => Persona) personas;
-
-    function PersonaRegistry() {
-
+    function setSelfClaim(bytes32 key, bytes32 value) public {
+        setClaim(msg.sender, key, value);
     }
 
-    function getPersonaData(address entity, address personaAddress) constant returns (string) {
-        return personas[personaAddress].ipfsPointer[entity];
+    function getClaim(address issuer, address subject, bytes32 key) public constant returns(bytes32) {
+        return claims[issuer][subject][key];
     }
 
-    function createPersona(string ipfsPointer) {
-        personas[msg.sender].ipfsPointer[msg.sender] = ipfsPointer;
-    }
-
-    function shareDataWithEntity(address entityAddress, string ipfsPointer) {
-        personas[msg.sender].ipfsPointer[entityAddress] = ipfsPointer;
-    }
-
-    function revokeDataWithEntity(address entityAddress) {
-        delete personas[msg.sender].ipfsPointer[entityAddress];
-    }
-
-    function() payable {
-        //anyone can fund this contract
+    function removeClaim(address issuer, address subject, bytes32 key) public {
+        require(msg.sender == issuer || msg.sender == subject);
+        delete claims[issuer][subject][key];
+        ClaimRemoved(msg.sender, subject, key, now);
     }
 }

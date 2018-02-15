@@ -1,1 +1,177 @@
-[{"constant":true,"inputs":[{"name":"entity","type":"address"},{"name":"personaAddress","type":"address"}],"name":"getIpfsPointer","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"entityAddress","type":"address"}],"name":"revokeDataWithEntity","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"personaAddress","type":"address"}],"name":"getPublicKey","outputs":[{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"entityAddress","type":"address"},{"name":"ipfsPointer","type":"string"}],"name":"shareDataWithEntity","outputs":[],"payable":false,"type":"function"},{"constant":true,"inputs":[{"name":"entity","type":"address"},{"name":"personaAddress","type":"address"}],"name":"getPersonaData","outputs":[{"name":"","type":"string"},{"name":"","type":"string"}],"payable":false,"type":"function"},{"constant":false,"inputs":[{"name":"publicKey","type":"string"},{"name":"ipfsPointer","type":"string"}],"name":"createPersona","outputs":[],"payable":false,"type":"function"},{"inputs":[],"payable":false,"type":"constructor"},{"payable":true,"type":"fallback"}]
+[
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "issuer",
+        "type": "address"
+      },
+      {
+        "name": "subject",
+        "type": "address"
+      },
+      {
+        "name": "key",
+        "type": "bytes32"
+      }
+    ],
+    "name": "getClaim",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "name": "",
+        "type": "address"
+      },
+      {
+        "name": "",
+        "type": "address"
+      },
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "claims",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "issuer",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "subject",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "key",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "removedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "ClaimRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "name": "issuer",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "subject",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "name": "key",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "value",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "name": "updatedAt",
+        "type": "uint256"
+      }
+    ],
+    "name": "ClaimSet",
+    "type": "event"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "issuer",
+        "type": "address"
+      },
+      {
+        "name": "subject",
+        "type": "address"
+      },
+      {
+        "name": "key",
+        "type": "bytes32"
+      }
+    ],
+    "name": "removeClaim",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "subject",
+        "type": "address"
+      },
+      {
+        "name": "key",
+        "type": "bytes32"
+      },
+      {
+        "name": "value",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setClaim",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "name": "key",
+        "type": "bytes32"
+      },
+      {
+        "name": "value",
+        "type": "bytes32"
+      }
+    ],
+    "name": "setSelfClaim",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]
