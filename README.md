@@ -1,17 +1,21 @@
 # digital-identity
-Sovereign identity system based on Ethereum
+Identity system based on Ethereum
 
 **Kovan Contract Address**
 
-NOTE: This contract is available on the Kovan testnet.  
+Registry contract can be found here
 
-0xd8fab77b7125de6d1a17dfacbdc0062837949a11
+0x8a5C9ca6d66c63cB17a3Ec21cedE5EeEa52EEd97
 
 **Demo** 
 
-https://digital-identity-app.herokuapp.com/
+This demo requires 2 devices, 1 to display the application's QR code and one to scan the QR code.
 
-Use that ink to run the client and open the Test Application https://identity-test-application.herokuapp.com/ in your browser.  Scan the QR code in the Test Application to test the login flow.
+Go to this link on smart phone - https://digital-identity-app.herokuapp.com/
+
+Go to this link in a browser - https://identity-test-application.herokuapp.com/
+
+NOTE: you will need gas in your client app for this to fully function
 
 **Features** 
 
