@@ -45,4 +45,3 @@ The works by creating personas which are a mapping of data to an Ethereum addres
 
     npm install
     browserify main.js > js/bundle.js
-    node app
