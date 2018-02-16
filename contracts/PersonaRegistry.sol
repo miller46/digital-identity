@@ -2,24 +2,24 @@ pragma solidity ^0.4.17;
 
 contract PersonaRegistry {
 
-    mapping(address => mapping(address => mapping(bytes32 => bytes32))) public claims;
+    mapping(address => mapping(address => mapping(bytes32 => bytes))) public claims;
 
     event ClaimSet(address indexed issuer, address indexed subject,
-        bytes32 indexed key, bytes32 value, uint updatedAt);
+        bytes32 indexed key, bytes value, uint updatedAt);
 
     event ClaimRemoved(address indexed issuer, address indexed subject,
         bytes32 indexed key, uint removedAt);
 
-    function setClaim(address subject, bytes32 key, bytes32 value) public {
+    function setClaim(address subject, bytes32 key, bytes value) public {
         claims[msg.sender][subject][key] = value;
         ClaimSet(msg.sender, subject, key, value, now);
     }
 
-    function setSelfClaim(bytes32 key, bytes32 value) public {
+    function setSelfClaim(bytes32 key, bytes value) public {
         setClaim(msg.sender, key, value);
     }
 
-    function getClaim(address issuer, address subject, bytes32 key) public constant returns(bytes32) {
+    function getClaim(address issuer, address subject, bytes32 key) public constant returns(bytes) {
         return claims[issuer][subject][key];
     }
 

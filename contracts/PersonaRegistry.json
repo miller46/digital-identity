@@ -19,7 +19,7 @@
     "outputs": [
       {
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "payable": false,
@@ -46,7 +46,7 @@
     "outputs": [
       {
         "name": "",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "payable": false,
@@ -101,7 +101,7 @@
       {
         "indexed": false,
         "name": "value",
-        "type": "bytes32"
+        "type": "bytes"
       },
       {
         "indexed": false,
@@ -147,7 +147,7 @@
       },
       {
         "name": "value",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "setClaim",
@@ -165,7 +165,7 @@
       },
       {
         "name": "value",
-        "type": "bytes32"
+        "type": "bytes"
       }
     ],
     "name": "setSelfClaim",

@@ -1,16 +1,16 @@
-var Web3Utility = require('./js/Web3Utility.js');
-var Config = require('./js/Config.js');
-var Buffer = Web3Utility.Buffer;
+var web3Utility = require('./js/utility/web3.js');
+var config = require('./js/config.js');
+var Buffer = web3Utility.Buffer;
 var async = require('async');
-var CookieUtility = require("./js/CookieUtility.js");
-var Crypto = require("./js/Crypto.js");
-var NetworkUtility = require("./js/NetworkUtility.js");
-var IpfsHelper = require("./js/IpfsHelper.js");
+var cookieUtility = require("./js/utility/cookie.js");
+var crypto = require("./js/crypto.js");
+var networkUtility = require("./js/utility/network.js");
+var ipfsHelper = require("./js/utility/ipfs.js");
 
 //** Globals ** //
 
-var web3 = Web3Utility.initWeb3(window.web3);
-var ipfs = Web3Utility.initIpfs();
+var web3 = web3Utility.initWeb3(new Web3(), config.ethProvider, {"network": "kovan", "etherscanApiKey": config.etherscanApiKey});
+var ipfs = ipfsHelper.initIpfs(config.ipfsProtocol + "://" + config.ipfsIpAddress, config.ipfsPort);
 var registryContract;
 var userAccount;
 var scanner;
@@ -34,17 +34,18 @@ function initUi() {
 }
 
 function initProfile() {
-    loadTemplate(Config.baseUrl + '/html/' + 'profile.ejs', 'profileContainer', {});
+    loadTemplate(config.baseUrl + '/html/' + 'profile.ejs', 'profileContainer', {});
     initUserInfo();
 }
 
 function initScanner() {
-    loadTemplate(Config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
+    loadTemplate(config.baseUrl + '/html/' + 'scanner.ejs', 'scannerContainer', {});
 }
 
 function initUserInfo() {
     if (userExists()) {
         userAccount = initUserAccount();
+        console.log(userAccount.publicKey);
     } else {
         initNewAccount();
     }
@@ -73,8 +74,8 @@ function beginScanner() {
             if (error) {
                 showErrorMessage(error)
             } else {
-                var txHash = "0xd9e0eec242464a6f6d48566dc193cb5802262517ed906916f89d3b6d9440ee59";
-                showSuccessMessage("Shared data successfully: \n <a href='https://kovan.etherscan.io/tx" + txHash + "'>View transaction</a>" )
+                var txHash = result.hash;
+                showSuccessMessage("Shared data successfully: \n <a target='_blank' href='https://kovan.etherscan.io/tx/" + txHash + "'>View transaction</a>" )
             }
         });
     });
@@ -107,9 +108,9 @@ function parseScannedContent(content, callback) {
         showAuthorizationDialog(data, function(data) {
 
             var fileContents = buildFileContents(data.permissions);
-            var encryptedData = Crypto.encrypt(data.publicKey, userAccount.privateKey, fileContents);
+            var encryptedData = crypto.encrypt(data.publicKey, userAccount.privateKey, fileContents);
 
-            NetworkUtility.post(Config.identityRouterUrl + "/" + data.hash, {}, {"data": encryptedData}, function (error, response) {
+            networkUtility.post(config.identityRouterUrl + "/" + data.hash, {}, {"data": encryptedData}, function (error, response) {
                 if (error) {
                     console.error(error);
                     callback(error, undefined);
@@ -124,9 +125,11 @@ function parseScannedContent(content, callback) {
     }
 }
 
-function createRecordInSmartContract(publicKey, ipfsPointer, callback) {
-    Web3Utility.send(web3, registryContract, Config.personaRegistryAddress, 'createPersona', [publicKey, ipfsPointer, {
+function createRecordInSmartContract(address, ipfsPointer, callback) {
+    var key = web3.fromAscii("identity_profile");
+    web3Utility.send(web3, registryContract, config.personaRegistryAddress, 'setClaim', [address, key, ipfsPointer, {
         gas: 250000,
+        price: config.defaultGasPrice,
         value: 0
     }], userAccount.address, userAccount.privateKey, undefined, function (functionError, result) {
         if (functionError) {
@@ -207,21 +210,21 @@ function showProfileTab() {
 }
 
 function userExists() {
-    return CookieUtility.readCookie("account");
+    return cookieUtility.readCookie("account");
 }
 
 function initUserAccount() {
-    return JSON.parse(CookieUtility.readCookie("account"));
+    return JSON.parse(cookieUtility.readCookie("account"));
 }
 
 function initNewAccount() {
-    userAccount = Web3Utility.createAccount();
-    CookieUtility.saveCookie("account", JSON.stringify(userAccount));
+    userAccount = web3Utility.createAccount();
+    cookieUtility.saveCookie("account", JSON.stringify(userAccount));
 }
 
 function showUserAccountInfo(account) {
     $('#user-address').text(account.address);
-    $('#user-public-key').text(Crypto.createPublicKey(userAccount.privateKey).toString());
+    $('#user-public-key').text(crypto.createPublicKey(userAccount.privateKey).toString());
     $('#user-private-key').text(account.privateKey);
 
     document.getElementById('icon').style.backgroundImage = 'url(' + blockies.create({
@@ -230,7 +233,7 @@ function showUserAccountInfo(account) {
 }
 
 function loadContract(callback) {
-    Web3Utility.loadContract(web3, Config.personaRegistryContract, Config.personaRegistryAddress,
+    web3Utility.loadContract(web3, config.baseUrl, config.personaRegistryContract + ".json", config.personaRegistryAddress,
         function(error, contract) {
         if (error) {
             console.log(error);
@@ -243,15 +246,20 @@ function loadContract(callback) {
 }
 
 function fetchPersona(contract, callback) {
-    Web3Utility.callContractFunction(web3, contract, Config.personaRegistryAddress, 'getIpfsPointer',
-        [userAccount.address, userAccount.address], function(error, result) {
+    var key = web3.fromAscii("identity_profile");
+    web3Utility.callContractFunction(web3, contract, config.personaRegistryAddress, 'getClaim',
+        [userAccount.address, userAccount.address, key], function(error, result) {
         if (error) {
             console.log(error);
             callback(error, undefined);
         } else {
-            ownIpfsHash = result;
-            console.log(result);
-            callback(undefined, result);
+            if (result === "0x0000000000000000000000000000000000000000000000000000000000000000") {
+                callback(undefined, "");
+            } else {
+                ownIpfsHash = web3.toAscii(result);
+                console.log(ownIpfsHash);
+                callback(undefined, ownIpfsHash);
+            }
         }
     });
 }
@@ -259,7 +267,7 @@ function fetchPersona(contract, callback) {
 function populateFormWithPersonaData(fileContents) {
     console.log(fileContents);
     try {
-        var decrypted = JSON.parse(Crypto.decrypt(userAccount.privateKey, fileContents));
+        var decrypted = JSON.parse(crypto.decrypt(userAccount.privateKey, fileContents));
         for (var field in decrypted) {
             if (decrypted.hasOwnProperty(field)) {
                 $('input[name="' + field + '"]').val(decrypted[field]);
@@ -306,7 +314,7 @@ function createPersona() {
             showErrorMessage(error);
         } else {
             var txHash = result.txHash;
-            showSuccessMessage("Information updated successfully: \n <a href='https://kovan.etherscan.io/tx" + txHash + "'>View transaction</a>" )
+            showSuccessMessage("Information updated successfully: \n <a target='_blank' href='https://kovan.etherscan.io/tx/" + txHash + "'>View transaction</a>" )
         }
     });
 }
@@ -320,10 +328,11 @@ function showSuccessMessage(message) {
 }
 
 function savePersonaForSelf(callback) {
-    var publicKey = Crypto.createPublicKey(userAccount.privateKey).toString();
+    var publicKey = crypto.createPublicKey(userAccount.privateKey).toString();
+    console.log(publicKey);
 
     var fileContents = buildFileContents(["name", "email", "city", "country"]);
-    var encryptedData = Crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
+    var encryptedData = crypto.encrypt(publicKey, userAccount.privateKey, fileContents);
 
     saveIpfsFile(publicKey + "-" + publicKey, encryptedData, function(error, response) {
         if (error) {
@@ -337,13 +346,11 @@ function savePersonaForSelf(callback) {
                     "</br>" +
                     "<table>" +
                     "<tr><td><b>From:</b></td><td>&nbsp;</td><td>" + userAccount.address + "</td></tr>" +
-                    "<tr><td><b>To:</b></td><td>&nbsp;</td><td>" + Config.personaRegistryAddress + "</td></tr>" +
+                    "<tr><td><b>To:</b></td><td>&nbsp;</td><td>" + config.personaRegistryAddress + "</td></tr>" +
                     "<tr><td><b>Gas Cost:</b></td><td>&nbsp;</td><td>(Estimated) 0.00052 - 0.00172 ETH</td></tr>" +
                     "</table>" +
                     "</br>", function (closeEvent) {
-                        var publicKey = Crypto.createPublicKey(userAccount.privateKey);
-
-                        createRecordInSmartContract(publicKey, ipfsPointer, function (functionError, result) {
+                        createRecordInSmartContract(userAccount.address, ipfsPointer, function (functionError, result) {
                             if (functionError) {
                                 console.log(functionError);
                                 callback(functionError, undefined);
@@ -376,7 +383,7 @@ function fetchIpfsFile(ipfsPointer, callback) {
     if (!ipfsPointer) {
         callback("No pointer found", undefined);
     } else {
-        NetworkUtility.get(Config.ipfsFetchUrl + "/" +  ipfsPointer, {}, function (error, response) {
+        networkUtility.get(config.ipfsFetchUrl + "/" +  ipfsPointer, {}, function (error, response) {
             if (error) {
                 callback(error.message, undefined);
             } else if (response.error) {
@@ -389,7 +396,7 @@ function fetchIpfsFile(ipfsPointer, callback) {
 }
 
 function saveIpfsFile(name, data, callback) {
-    IpfsHelper.saveIpfsFile(name, data, function(error, response) {
+    ipfsHelper.saveIpfsFile(ipfs, name, data, function(error, response) {
         if (error) {
             callback(error.message, undefined);
         } else {
