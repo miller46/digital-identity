@@ -29,17 +29,10 @@ NOTE: you will need gas in your client app for this to fully function
 
 The works by creating personas which are a mapping of data to an Ethereum address.  The data is stored in IPFS and encrypted so only you can decrypt it.  The IPFS file paths are stored in the blockchain.  You can share data with applications on an attribute by attribute basis, and encrypt the dataset with the public key of the entity you'd like to share with, so that only they can decrypt it.  Sharing can occur by the client scanning a QR with data following an expected format which allows the client to approve the request to share data, and submit the transaction to the blockchain so that the application can get the files from IPFS and decrypt the data. 
 
-Step 0 - Set profile information
 <img alt="Profile" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/profile1.png" width=300 />
 <img alt="Profile" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/profile2.png" width=300 />
-
-Step 1 - scan QR code provided by application
 <img alt="Scanner" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/scanner.png" width=300 />
-
-Step 2 - approve information to be shared with application (can be revoked later)
 <img alt="Approval" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/confirmation.png" width=300 />
-
-Step 3 - user is logged in and application receives information
 <img alt="Profile" src="https://raw.githubusercontent.com/miller46/digital-identity/master/screenshots/success.png" width=300 />
 
 **NOTES**
