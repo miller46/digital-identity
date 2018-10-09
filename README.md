@@ -15,7 +15,7 @@ Go to this link on smart phone - https://digital-identity-app.herokuapp.com/
 
 Go to this link in a browser - https://identity-test-application.herokuapp.com/
 
-NOTE: you will need gas in your client app for this to fully function
+NOTE: you will need gas in your client app for this to fully function. See [here](https://github.com/kovan-testnet/faucet) about acquiring Kovan Ether.
 
 **Features** 
 
