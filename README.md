@@ -1,7 +1,7 @@
 # digital-identity
 Identity system based on Ethereum
 
-##Kovan Contract Address
+## Kovan Contract Address
 
 Registry contract can be found here
 
